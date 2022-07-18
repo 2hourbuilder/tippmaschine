@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet, TouchableOpacity } from "react-native";
+import { StyledButton } from "../../components/core";
 import { Text, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 
@@ -14,9 +15,12 @@ export default function LoginScreen({
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <TouchableOpacity onPress={() => alert("Logged in!")}>
-        <Text style={styles.title}>Press to login</Text>
-      </TouchableOpacity>
+      <StyledButton
+        label="Press to login"
+        backgroundColor={"cardPrimaryBackground"}
+        p={"m"}
+        onPress={() => alert("Logged in")}
+      />
       <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
         <Text style={styles.title}>Press here to register</Text>
       </TouchableOpacity>

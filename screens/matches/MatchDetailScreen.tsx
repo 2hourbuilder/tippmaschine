@@ -3,18 +3,24 @@ import { Platform, StyleSheet } from "react-native";
 import { Text, View } from "../../components/Themed";
 import { NestedStackScreenProps } from "../../types";
 
+interface MatchDetailScreenProps {
+  navigation: NestedStackScreenProps<"MatchDetail", "MatchesTab">["navigation"];
+  route: NestedStackScreenProps<"MatchDetail", "MatchesTab">["route"];
+}
+
 export default function MatchDetailScreen({
   navigation,
-}: NestedStackScreenProps<"MatchDetail", "MatchesTab">) {
+  route,
+}: MatchDetailScreenProps) {
+  const matchId = route.params.matchId;
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Match details</Text>
+      <Text style={styles.title}>{matchId}</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }

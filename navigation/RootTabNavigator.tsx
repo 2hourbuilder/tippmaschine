@@ -1,9 +1,8 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@shopify/restyle";
+import { Theme } from "../styles/theme";
 import { RootTabParamList } from "../types";
-
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
 
 import CompetitionStackNavigator from "./CompetitionStackNavigator";
 import MatchesStackNavigator from "./MatchesStackNavigator";
@@ -12,13 +11,13 @@ import ProfileStackNavigator from "./ProfileStackNavigator";
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 const RootTabNavigator = () => {
-  const colorScheme = useColorScheme();
+  const theme = useTheme<Theme>();
 
   return (
     <BottomTab.Navigator
       initialRouteName="MatchesTab"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: theme.colors.accentPrimary,
       }}
       defaultScreenOptions={{ headerShown: false }}
     >

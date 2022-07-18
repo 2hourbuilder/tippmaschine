@@ -1,16 +1,32 @@
 import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet, TouchableOpacity } from "react-native";
+import { StyledText, StyledView } from "../../components/core";
 import { Text, View } from "../../components/Themed";
+import { dummyCompetition1 } from "../../data/dummyCompetitions";
+import { dummyUser1 } from "../../data/dummyUser";
+import { MyCompetition } from "../../models/user";
 import { NestedStackScreenProps } from "../../types";
+
+interface CompetitionScreenProps {
+  navigation: NestedStackScreenProps<
+    "Competition",
+    "CompetitionTab"
+  >["navigation"];
+  route: NestedStackScreenProps<"Competition", "CompetitionTab">["route"];
+}
 
 export default function CompetitionScreen({
   navigation,
   route,
-}: NestedStackScreenProps<"Competition", "CompetitionTab">) {
-  const competitionId = route.params.competitionId;
+}: CompetitionScreenProps) {
+  const myCompetition = dummyUser1.myCompetitions[0];
+  const competition = dummyCompetition1;
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{competitionId}</Text>
+    <StyledView px={"m"}>
+      <StyledText variant={"header"} textAlign="center" paddingVertical={"m"}>
+        {myCompetition.name}
+      </StyledText>
+      <StyledText variant={"subheader"}>Scoring board</StyledText>
       <View
         style={styles.separator}
         lightColor="#eee"
@@ -19,7 +35,7 @@ export default function CompetitionScreen({
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("CompetitionSettings", {
-            competitionId: competitionId,
+            competitionId: competition.id,
           })
         }
       >
@@ -28,17 +44,11 @@ export default function CompetitionScreen({
       <TouchableOpacity onPress={() => navigation.navigate("AddCompetition")}>
         <Text style={styles.title}>Add new competition</Text>
       </TouchableOpacity>
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+    </StyledView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   title: {
     fontSize: 20,
     fontWeight: "bold",

@@ -1,28 +1,16 @@
-import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "../../components/Themed";
+import { StyleSheet } from "react-native";
+import { StyledView } from "../../components/core";
+import MatchesList from "../../components/matches/MatchesList";
+import { matchesGrouped } from "../../data/dummyMatches";
 import { NestedStackScreenProps } from "../../types";
 
 export default function MatchlistScreen({
   navigation,
 }: NestedStackScreenProps<"MatchDetail", "MatchesTab">) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>List of matches</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("MatchDetail", { matchId: "Test match" })
-        }
-      >
-        <Text style={styles.title}>Go to match details</Text>
-      </TouchableOpacity>
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+    <StyledView px={"m"}>
+      <MatchesList matchesGrouped={matchesGrouped} />
+    </StyledView>
   );
 }
 
