@@ -1,8 +1,7 @@
-export interface User {
-  id: string;
+export interface Profile {
   myCompetitions: MyCompetition[];
-  settings: UserSettings;
-  isRegistered: boolean;
+  settings: ProfileSettings;
+  username: string | undefined;
 }
 
 export interface MyCompetition {
@@ -25,8 +24,7 @@ export interface MyTip {
   actualPoints: number | null;
 }
 
-export interface UserSettings {
-  name: string;
+export interface ProfileSettings {
   language: "en-US" | "de-DE";
-  createdAt: Date;
+  appearance: "dark" | "light" | "system";
 }

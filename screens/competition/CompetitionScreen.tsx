@@ -1,10 +1,9 @@
-import { Platform, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { StyledText, StyledView } from "../../components/core";
 import { Text, View } from "../../components/Themed";
 import { dummyCompetition1 } from "../../data/dummyCompetitions";
 import { dummyUser1 } from "../../data/dummyUser";
 import { useCompetition } from "../../firebase/firestore/CompetitionContext";
-import { MyCompetition } from "../../models/user";
 import { NestedStackScreenProps } from "../../types";
 
 interface CompetitionScreenProps {

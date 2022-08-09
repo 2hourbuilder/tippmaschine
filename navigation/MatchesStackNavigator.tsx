@@ -3,16 +3,12 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MatchesStackParamList, NestedStackScreenProps } from "../types";
 
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
-
 import Matchlist from "../screens/matches/MatchlistScreen";
 import MatchDetailScreen from "../screens/matches/MatchDetailScreen";
 
 const Stack = createNativeStackNavigator<MatchesStackParamList>();
 
 const MatchesStackNavigator = () => {
-  const colorScheme = useColorScheme();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -32,7 +28,6 @@ const MatchesStackNavigator = () => {
               <FontAwesome
                 name="info-circle"
                 size={25}
-                color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
               />
             </Pressable>

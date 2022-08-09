@@ -1,4 +1,4 @@
-import { MyCompetition, User } from "../models/user";
+import { MyCompetition, Profile } from "../models/profile";
 
 const dummyMyCompetition1: MyCompetition = {
   automationEnabled: false,
@@ -11,13 +11,10 @@ const dummyMyCompetition1: MyCompetition = {
   myTips: [],
 };
 
-export const dummyUser1: User = {
-  id: "testuser",
-  isRegistered: true,
+export const dummyUser1: Profile = {
   settings: {
-    createdAt: new Date(2022, 7, 1),
+    appearance: "system",
     language: "en-US",
-    name: "Christopher",
   },
   myCompetitions: [dummyMyCompetition1],
 };

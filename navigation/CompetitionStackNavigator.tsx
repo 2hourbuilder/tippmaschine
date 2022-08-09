@@ -3,9 +3,6 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { CompetitionStackParamList, NestedStackScreenProps } from "../types";
 
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
-
 import CompetitionScreen from "../screens/competition/CompetitionScreen";
 import CompetitionSettingsScreen from "../screens/competition/CompetitionSettingsScreen";
 import AddCompetitionScreen from "../screens/competition/AddCompetitionScreen";
@@ -13,7 +10,6 @@ import AddCompetitionScreen from "../screens/competition/AddCompetitionScreen";
 const Stack = createNativeStackNavigator<CompetitionStackParamList>();
 
 const CompetitionStackNavigator = () => {
-  const colorScheme = useColorScheme();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -34,7 +30,6 @@ const CompetitionStackNavigator = () => {
               <FontAwesome
                 name="info-circle"
                 size={25}
-                color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
               />
             </Pressable>

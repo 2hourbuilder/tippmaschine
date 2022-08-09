@@ -3,16 +3,15 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NestedStackScreenProps, ProfileStackParamList } from "../types";
 
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
-
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import DetailSettingsScreen from "../screens/profile/DetailSettingsScreen";
+import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
+import { ChangePasswordScreen } from "../screens/auth/ChangePasswordScreen";
+import { DeleteAccountScreen } from "../screens/auth/DeleteAccountScreen";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
 const ProfileStackNavigator = () => {
-  const colorScheme = useColorScheme();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -32,7 +31,6 @@ const ProfileStackNavigator = () => {
               <FontAwesome
                 name="info-circle"
                 size={25}
-                color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
               />
             </Pressable>
@@ -44,6 +42,9 @@ const ProfileStackNavigator = () => {
         component={DetailSettingsScreen}
         initialParams={{ userId: "123" }}
       />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
     </Stack.Navigator>
   );
 };

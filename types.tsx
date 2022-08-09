@@ -41,6 +41,9 @@ export type CompetitionStackParamList = {
 export type ProfileStackParamList = {
   Profile: { userId: string };
   DetailSettings: { userId: string };
+  ResetPassword: undefined;
+  ChangePassword: undefined;
+  DeleteAccount: undefined;
 };
 
 type NestedStackScreenParamList = MatchesStackParamList &

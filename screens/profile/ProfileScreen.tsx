@@ -1,42 +1,36 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { StyledView } from "../../components/core";
-import { Text, View } from "../../components/Themed";
+import { StyledButton, StyledText, StyledView } from "../../components/core";
+import { SignInForm } from "../../components/profile/SignInForm";
+import { useUser } from "../../firebase/auth/AuthContext";
+import { logout } from "../../firebase/auth/authFunctions";
 import { NestedStackScreenProps } from "../../types";
 
 export default function ProfileScreen({
   navigation,
 }: NestedStackScreenProps<"Profile", "ProfileTab">) {
+  const { user, profile } = useUser();
+
+  if (user === null) {
+    return <SignInForm />;
+  } else if (user.isAnonymous) {
+    return <SignInForm />;
+  }
+
   return (
-    <StyledView style={styles.container}>
-      <Text style={styles.title}>My profile</Text>
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.title}>Login</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Intro")}>
-        <Text style={styles.title}>Start onboarding flow</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => navigation.navigate("DetailSettings", { userId: "123" })}
-      >
-        <Text style={styles.title}>Go to detailed settings</Text>
-      </TouchableOpacity>
+    <StyledView
+      flexDirection={"column"}
+      justifyContent={"center"}
+      alignItems="center"
+    >
+      <StyledText variant={"header"}>Hi {profile?.username}</StyledText>
+      <StyledButton label="Logout" onPress={async () => await logout()} />
+      <StyledButton
+        label="Change password"
+        onPress={() => navigation.navigate("ChangePassword")}
+      />
+      <StyledButton
+        label="Delete account"
+        onPress={async () => navigation.navigate("DeleteAccount")}
+      />
     </StyledView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-});
