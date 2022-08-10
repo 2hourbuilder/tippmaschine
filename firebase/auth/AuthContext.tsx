@@ -33,8 +33,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Profile | undefined>();
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      if (firebaseUser) {
-      } else {
+      if (!firebaseUser) {
         try {
           await signInAnonymously(auth);
         } catch (error) {

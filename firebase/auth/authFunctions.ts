@@ -1,4 +1,4 @@
-import { auth, firestore } from "../setup";
+import { auth } from "../setup";
 import {
   createUserWithEmailAndPassword,
   AuthError,
@@ -148,7 +148,7 @@ export const changePassword = async (
         case AuthErrorCodes.CREDENTIAL_TOO_OLD_LOGIN_AGAIN:
           if (afterReauthentication === undefined) {
             await reAuthenticate(password);
-            await deleteAccount(password, true);
+            await changePassword(password, newPassword, true);
           }
           break;
         case AuthErrorCodes.INVALID_PASSWORD:
