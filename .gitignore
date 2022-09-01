@@ -14,3 +14,5 @@ web-build/
 .DS_Store
 
 firebase/config.ts
+firebase-debug.log
+firestore-debug.log

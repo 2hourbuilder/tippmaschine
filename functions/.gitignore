@@ -1,0 +1,17 @@
+# Compiled JavaScript files
+lib/**/*.js
+lib/**/*.js.map
+
+# TypeScript v1 declaration files
+typings/
+
+# Node.js dependency directory
+node_modules/
+
+# Service account credentials
+tippmaschine-*.json
+.env
+
+# API credentials
+
+src/api-football/APIcredentials.ts

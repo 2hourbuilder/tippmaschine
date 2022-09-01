@@ -1,8 +1,4 @@
-export interface Team {
-  id: string;
-  name: string;
-  logoUrl: string;
-}
+import { Team } from "./team";
 
 export interface Score {
   homeTeam: number | null;
@@ -18,13 +14,12 @@ export interface Odds {
 }
 
 export interface Match {
-  id: string;
+  id: string | null;
   kickoff: Date;
   homeTeam: Team;
   awayTeam: Team;
-  matchdayId: string;
   score: Score;
-  odds: Array<Odds>;
+  odds: Array<Odds> | null;
   status: "scheduled" | "live" | "finished";
 }
 

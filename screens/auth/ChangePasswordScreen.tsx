@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { TextField } from "../../components/forms/TextField";
 import { useState } from "react";
 import { ActivityIndicator, Alert } from "react-native";
-import { changePassword } from "../../firebase/auth/AuthFunctions";
+import { changePassword } from "../../firebase/auth/authFunctions";
 import { NestedStackScreenProps } from "../../types";
 
 type FormData = {
