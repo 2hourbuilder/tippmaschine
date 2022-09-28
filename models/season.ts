@@ -20,4 +20,6 @@ export interface Season {
   id: string | null;
   groups: Group[];
   matches: Match[];
+  startYear: number;
+  kurzname: string;
 }

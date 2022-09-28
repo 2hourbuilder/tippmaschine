@@ -7,9 +7,12 @@ export interface Score {
 
 export interface Odds {
   providerName: string;
-  homeWin: number;
-  awayWin: number;
-  draw: number;
+  matchWinner: {
+    homeWin: number;
+    awayWin: number;
+    draw: number;
+  };
+  overUnder: { threshold: number; over: number; under: number }[] | null;
   lastUpdate: Date;
 }
 
@@ -19,8 +22,11 @@ export interface Match {
   homeTeam: Team;
   awayTeam: Team;
   score: Score;
-  odds: Array<Odds> | null;
+  odds: Odds | null;
   status: "scheduled" | "live" | "finished";
+  apiFixtureId: number;
+  matchday: number;
+  seasonId: string;
 }
 
 export interface MatchGroupItem {

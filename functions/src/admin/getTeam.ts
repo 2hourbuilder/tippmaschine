@@ -29,6 +29,13 @@ const getTeam = async (name: { en: string; de: string }) => {
     return team;
   } else {
     // add team
+    if (name.de === "Katar") {
+      console.log(
+        `Team ${name.de} / ${
+          name.en
+        } not created. Add now at ${new Date().toLocaleTimeString()}`
+      );
+    }
     const team = await addTeam(name);
     if (team) {
       return team;

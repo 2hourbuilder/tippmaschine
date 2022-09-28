@@ -16,7 +16,6 @@ const listTeamsAPI = async (leagueId: string, season: string) => {
   };
 
   try {
-    console.log(options);
     const response = await axios(options);
     const teams: Array<APITeam> = response.data.response.map(
       (team: APISearchTeamResponse) => team.team

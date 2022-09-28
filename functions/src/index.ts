@@ -1,28 +1,22 @@
-import { onCall, onRequest } from "firebase-functions/v2/https";
+import { onCall } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
-import * as logger from "firebase-functions/logger";
-import axios from "axios";
-import getlogintoken from "./getlogintoken";
+import getlogintoken from "./kicktipp/getlogintoken";
 import getseason from "./admin/addSeason";
-
 import "dotenv/config";
-import addteam from "./admin/addTeam";
-admin.initializeApp();
-// export const firestore = app.firestore();
+import updateoddsmonthly from "./admin/updateOdds";
+import addcompetition from "./kicktipp/addcompetition";
 
-export const helloworld = onRequest(async (request, response) => {
-  logger.info("Hello firestore!", { structuredData: true });
-  response.send("Hello Firestore!");
-});
+const app = admin.initializeApp();
+export const firestore = app.firestore();
 
 export const findcompetition = onCall(
   { region: "europe-west1" },
   async (event) => {
-    const result = await axios.get("https://reqres.in/api/users/2");
-    return { user: event.auth?.uid, result: result.data };
+    const result = await updateoddsmonthly();
+    return JSON.stringify(result);
   }
 );
 
 exports.getlogintoken = getlogintoken;
 exports.getseason = getseason;
-exports.addteam = addteam;
+exports.addcompetition = addcompetition;

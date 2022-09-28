@@ -1,7 +1,10 @@
 import { CallableRequest, onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import axios from "axios";
-import { GetLoginTokenParams, GetLoginTokenResults } from "../../functionTypes";
+import {
+  GetLoginTokenParams,
+  GetLoginTokenResults,
+} from "../../../functionTypes";
 
 const getlogintoken = onCall(
   { region: "europe-west1" },

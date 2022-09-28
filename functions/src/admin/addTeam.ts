@@ -31,7 +31,6 @@ const addTeam = async (name: { en: string; de: string }) => {
       name.en,
       teams.map((team) => team.name)
     );
-    console.log(matches);
     const bestmatch = teams[matches.bestMatchIndex];
     if (matches.bestMatch.rating > 0.8) {
       const team: Team = {
@@ -45,7 +44,17 @@ const addTeam = async (name: { en: string; de: string }) => {
       return null;
     }
   };
-  const team = await createTeam();
+  let team: Team | null;
+  if (name.de === "unbekannt") {
+    team = {
+      apiId: null,
+      id: null,
+      logoUrl: null,
+      name: name,
+    };
+  } else {
+    team = await createTeam();
+  }
   if (team) {
     const id = await writeToFirestore(team);
     team.id = id;

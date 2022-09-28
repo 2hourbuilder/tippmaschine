@@ -22,3 +22,36 @@ export interface APISearchTeamResponse {
   team: APITeam;
   venue: APIVenue;
 }
+
+export interface APIFixture {
+  fixture: {
+    id: number | null;
+    timestamp: number;
+  };
+  teams: {
+    home: {
+      id: number;
+      name: string;
+    };
+    away: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
+export interface APIBet {
+  id: number;
+  name: "Match Winner" | "Goals Over/Under" | "Exact Score";
+  values: { value: string; odd: number }[];
+}
+export interface APIBookmaker {
+  id: number;
+  name: string;
+  bets: APIBet[];
+}
+
+export interface APIOdds {
+  update: string;
+  bookmakers: APIBookmaker[];
+}
