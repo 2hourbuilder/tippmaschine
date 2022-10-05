@@ -85,6 +85,8 @@ const addcompetition = onCall(
 
     const tippSaisonId = await getTippsaisonId();
 
+    console.log(tippSaisonId);
+
     const addcompetitionName = async () => {
       const config = {
         method: "get",

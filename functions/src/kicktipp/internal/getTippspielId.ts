@@ -25,14 +25,10 @@ const gettippspielids = async (
   );
 
   const result = dataRows.map((dataRow) => {
-    const [
-      tippterminRaw,
-      homeTeamName,
-      awayTeamName /* pointRule */,
-      ,
-      tippCell,
-    ] = $(dataRow).children().toArray();
-
+    const [tippterminRaw, homeTeamName, awayTeamName] = $(dataRow)
+      .children()
+      .toArray();
+    const tippCell = $(dataRow).find(".kicktipp-tippabgabe");
     let currentSubmitDate: Date;
     if ($(tippterminRaw).text().length == 0) {
       currentSubmitDate = lastSubmitDate;

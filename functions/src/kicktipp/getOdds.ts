@@ -43,7 +43,7 @@ const getOdds = async (
     },
     overUnder: null,
     lastUpdate: new Date(),
-    providerName: "kicktipp",
+    providerName: "Kicktipp",
   };
   return odds;
 };

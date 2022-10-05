@@ -5,15 +5,8 @@ import {
   addCompetition,
   getLoginToken,
   getSeason,
-  getOdds,
+  updateOdds,
 } from "../../firebase/functions";
-import getMatchdayTippspielIds from "../../functions/src/kicktipp/internal/getTippspielId";
-import getExpectedGoals from "../../functions/src/odds/getExpectedGoals";
-import oddsToAdjProbs from "../../functions/src/odds/oddsToAdjProbs";
-import {
-  calculate3wayProbFromPoisson,
-  calculateTeamLambdas,
-} from "../../functions/src/odds/poisson";
 import { NestedStackScreenProps } from "../../types";
 
 const createSeasonHandler = async () => {
@@ -23,9 +16,9 @@ const createSeasonHandler = async () => {
       password: "chrisi",
     });
     const season = await getSeason({
-      kurzname: "tippmaschine-wm22",
+      kurzname: "canadalife",
       loginToken: result.loginToken!,
-      apiLeagueId: "1",
+      apiLeagueId: "78", // wm = 1 / buli = 78
       apiSeason: "2022",
     });
 
@@ -37,8 +30,11 @@ const createSeasonHandler = async () => {
 
 const getOddsHandler = async () => {
   try {
-    const seasons = await getOdds(null);
-    alert(JSON.stringify(seasons));
+    const result = await updateOdds({
+      fromDaysInFuture: 1,
+      untilDaysInFuture: 30,
+    });
+    alert(JSON.stringify(result));
   } catch (err) {
     console.log(err);
   }
@@ -50,7 +46,7 @@ const addCompetitionHandler = async () => {
     password: "chrisi",
   });
   const result = await addCompetition({
-    kurzname: "tippmaschine-wm22",
+    kurzname: "cnbbuli",
     loginToken: token.loginToken!,
   });
   alert(JSON.stringify(result));

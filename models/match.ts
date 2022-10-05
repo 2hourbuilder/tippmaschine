@@ -6,7 +6,7 @@ export interface Score {
 }
 
 export interface Odds {
-  providerName: string;
+  providerName: "Kicktipp" | "API-FOOTBALL";
   matchWinner: {
     homeWin: number;
     awayWin: number;

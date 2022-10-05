@@ -3,18 +3,20 @@ import {
   onCall,
   HttpsError,
 } from "firebase-functions/v2/https";
+import * as stringSimilarity from "string-similarity";
 import { logger } from "firebase-functions";
 import { firestore } from "firebase-admin";
 import axios from "axios";
 import * as cheerio from "cheerio";
+import * as dayjs from "dayjs";
 import { GetSeasonParams, GetSeasonResults } from "../../../functionTypes";
 import { Season } from "../../../models/season";
 import { Match } from "../../../models/match";
 import { parseKicktippDate } from "../util";
-import getTeam from "./getTeam";
 import getFixtures from "../api-football/getFixtures";
 import { Team } from "../../../models/team";
 import getNumberOfMatchdays from "../kicktipp/internal/getNumberOfMatchdays";
+import listTeamsAPI from "../api-football/teams";
 
 const addseason = onCall(
   { region: "europe-west1" },
@@ -36,9 +38,117 @@ const addseason = onCall(
       return !result.empty;
     };
 
+    const addTeam = async (name: { en: string; de: string }) => {
+      const writeToFirestore = async (team: Team) => {
+        const { logoUrl, name, apiId } = team;
+        try {
+          const ref = await firestore().collection("teams").add({
+            logoUrl: logoUrl,
+            apiId: apiId,
+            name: name,
+          });
+          return ref.id;
+        } catch (error) {
+          logger.error("Could not add team to Firestore", error);
+          throw new HttpsError(
+            "internal",
+            "Could not add team to Firestore",
+            error
+          );
+        }
+      };
+
+      const createTeam = async () => {
+        const teams = await listTeamsAPI(apiLeagueId, apiSeason);
+        const matches = stringSimilarity.findBestMatch(
+          name.en,
+          teams.map((team) => team.name)
+        );
+        const bestmatch = teams[matches.bestMatchIndex];
+        if (matches.bestMatch.rating > 0.35) {
+          const team: Team = {
+            id: null,
+            apiId: bestmatch.id,
+            name: name,
+            logoUrl: bestmatch.logo,
+          };
+          return team;
+        } else {
+          console.log(
+            `Best match '${bestmatch.name}' is below threshold of 0.5 with rating of ${matches.bestMatch.rating}`
+          );
+          return null;
+        }
+      };
+      let team: Team | null;
+      if (name.de === "unbekannt") {
+        team = {
+          apiId: null,
+          id: null,
+          logoUrl: null,
+          name: name,
+        };
+      } else {
+        team = await createTeam();
+      }
+      if (team) {
+        const id = await writeToFirestore(team);
+        team.id = id;
+      } else {
+        throw new Error(
+          `Could not create team for given name ${name.de} / ${name.en}. `
+        );
+      }
+      return team;
+    };
+
+    const getTeam = async (name: { en: string; de: string }) => {
+      let doc = null;
+      const snapshotEN = await firestore()
+        .collection("teams")
+        .where("name.en", "==", name.en)
+        .get();
+      if (snapshotEN.empty) {
+        const snapshotDE = await firestore()
+          .collection("teams")
+          .where("name.de", "==", name.de)
+          .get();
+        if (!snapshotDE.empty) {
+          doc = snapshotDE.docs[0];
+        }
+      } else {
+        doc = snapshotEN.docs[0];
+      }
+      if (doc) {
+        const team: Team = {
+          id: doc.id,
+          apiId: doc.data().apiId,
+          logoUrl: doc.data().logoUrl,
+          name: doc.data().name,
+        };
+        return team;
+      } else {
+        // add team
+        console.log("Adding team: ", name.de);
+        const team = await addTeam(name);
+        if (team) {
+          return team;
+        } else {
+          return null;
+        }
+      }
+    };
+
     const addSeasonToFirestore = async (season: Season) => {
-      const { seasonId, seasonName, groups, updatedAt, matches, startYear } =
-        season;
+      const {
+        seasonId,
+        seasonName,
+        groups,
+        updatedAt,
+        matches,
+        startYear,
+        kurzname,
+      } = season;
       try {
         exists = await checkIfSeasonExists(seasonId);
         if (!exists) {
@@ -54,6 +164,7 @@ const addseason = onCall(
                 0
               ),
               startYear: startYear,
+              kurzname: kurzname,
             });
 
           const bulkWriter = firestore().bulkWriter();
@@ -106,12 +217,22 @@ const addseason = onCall(
         const responseEN = await axios(configEN);
         const $de = cheerio.load(responseDE.data);
         const $en = cheerio.load(responseEN.data);
-        const seasonDE = $de(`a[href^='/${kurzname}/tabellen?saisonId=']`);
-        const seasonEN = $en(`a[href^='/${kurzname}/tables?saisonId=']`);
-        const seasonId = seasonDE.attr("href")?.split("saisonId=")[1];
+        const seasonDE = $de("div[class='tabs']")
+          .children()
+          .not(".optiontab")
+          .not(".optionoverlay")
+          .toArray();
+        const seasonEN = $en("div[class='tabs']")
+          .children()
+          .not(".optiontab")
+          .not(".optionoverlay")
+          .toArray();
+        const seasonId = $de("a", seasonDE[0])
+          .attr("href")
+          ?.split("saisonId=")[1];
         const seasonName = {
-          de: seasonDE.text().split("Anzeigen")[0],
-          en: seasonEN.text().split("Display")[0],
+          de: $de(seasonDE[0]).text(),
+          en: $en(seasonEN[0]).text(),
         };
         const groups = $de("table").filter(".sporttabelle").toArray();
         const groupsEN = $en("table").filter(".sporttabelle").toArray();
@@ -222,10 +343,15 @@ const addseason = onCall(
           const apiFixtureId = homeTeam
             ? fixtures.find(
                 (fixture) =>
-                  fixture.fixture.timestamp === kickoff.getTime() / 1000 &&
+                  dayjs
+                    .unix(fixture.fixture.timestamp)
+                    .isSame(dayjs(kickoff), "day") &&
                   fixture.teams.home.id === homeTeam.apiId
               )?.fixture.id
             : null;
+          if (homeTeam === null) {
+            console.log("Can't find team for: ", $(homeTeamName).text());
+          }
           return {
             kickoff: kickoff,
             homeTeam: homeTeam,

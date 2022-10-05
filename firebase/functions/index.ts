@@ -6,15 +6,16 @@ import {
   AddCompetitionResults,
   GetLoginTokenParams,
   GetLoginTokenResults,
-  GetOddsMonthlyParams,
-  GetOddsMonthlyResults,
+  UpdateOddsParams,
+  UpdateOddsResults,
   GetSeasonParams,
   GetSeasonResults,
 } from "../../functionTypes";
 
-export const getOdds = createFunctionURL<null, GetOddsMonthlyResults>(
-  "http://localhost:5001/tippmaschine-8fb2e/europe-west1/findcompetition"
-);
+export const updateOdds = createFunctionURL<
+  UpdateOddsParams,
+  UpdateOddsResults
+>("http://localhost:5001/tippmaschine-8fb2e/europe-west1/updateodds");
 
 export const getLoginToken = createFunctionURL<
   GetLoginTokenParams,

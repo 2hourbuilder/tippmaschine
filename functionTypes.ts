@@ -1,5 +1,3 @@
-import { Season } from "./models/season";
-
 export interface GetLoginTokenParams {
   username: string;
   password: string;
@@ -31,8 +29,13 @@ export type GetSeasonResults = {
   message?: string;
 };
 
-export interface GetOddsMonthlyParams {}
+export interface UpdateOddsParams {
+  fromDaysInFuture?: number;
+  untilDaysInFuture?: number;
+}
 
-export interface GetOddsMonthlyResults {
-  seasons: Season[];
+export interface UpdateOddsResults {
+  season: { en: string; de: string };
+  matches: number;
+  odds: number;
 }
