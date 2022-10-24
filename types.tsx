@@ -22,13 +22,15 @@ export type RootStackParamList = {
   NotFound: undefined;
   Login: undefined;
   Signup: undefined;
-  Intro: undefined;
-  AddInfos: undefined;
-  ExplainFlow: undefined;
+  OnboardingFirstScreen: undefined;
+  OnboardingSecondScreen: undefined;
+  OnboardingThirdScreen: { competitionIds: string[] } | undefined;
+  OnboardingFourthScreen: undefined;
+  OnboardingFifthScreen: undefined;
 };
 
 export type MatchesStackParamList = {
-  Matchlist: undefined;
+  Matchlist: { competitionId: string };
   MatchDetail: { matchId: string };
 };
 

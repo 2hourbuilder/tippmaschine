@@ -44,6 +44,7 @@ export const theme = createTheme({
     borderPrimary: palette.gray[300],
   },
   spacing: {
+    none: 0,
     xs: 4,
     s: 8,
     m: 16,
@@ -77,6 +78,18 @@ export const theme = createTheme({
       fontFamily: "Lato_700Bold",
       fontSize: 14,
       lineHeight: 20,
+      color: "textPrimary",
+    },
+    hintMessage: {
+      fontFamily: "Lato_400Regular",
+      fontSize: 12,
+      lineHeight: 16,
+      color: "textTertiary",
+    },
+    inputField: {
+      fontFamily: "Lato_400Regular",
+      fontSize: 16,
+      lineHeight: 18,
       color: "textPrimary",
     },
     defaults: {

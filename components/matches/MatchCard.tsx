@@ -1,11 +1,11 @@
 import { Image, TouchableOpacity } from "react-native";
-import { Match } from "../../models/match";
 import { NestedStackScreenProps } from "../../types";
 import { StyledText, StyledView } from "../core";
 import { useNavigation } from "@react-navigation/native";
+import { MatchShort } from "../../models/match";
 
 interface MatchCardProps {
-  matchDetails: Match;
+  matchDetails: MatchShort;
 }
 
 const MatchCard = ({ matchDetails }: MatchCardProps) => {
@@ -13,29 +13,18 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
     useNavigation<
       NestedStackScreenProps<"MatchDetail", "MatchesTab">["navigation"]
     >();
-  const scoreString = `${
-    matchDetails.score.homeTeam ? matchDetails.score.homeTeam : "-"
-  } : ${matchDetails.score.awayTeam ? matchDetails.score.awayTeam : "-"}`;
-  const oddsString = `${matchDetails.odds[0].homeWin.toFixed(
-    2
-  )} | ${matchDetails.odds[0].draw.toFixed(
-    2
-  )} | ${matchDetails.odds[0].awayWin.toFixed(2)}`;
   return (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate("MatchDetail", {
-          matchId: matchDetails.id,
-        })
+        matchDetails.matchId
+          ? navigation.navigate("MatchDetail", {
+              matchId: matchDetails.matchId,
+            })
+          : null
       }
       activeOpacity={0.8}
     >
-      <StyledView
-        bg={"cardPrimaryBackground"}
-        borderRadius={"l"}
-        padding="s"
-        marginVertical={"s"}
-      >
+      <StyledView borderRadius={"l"} padding="s" marginVertical={"s"}>
         <StyledView
           flexDirection="row"
           justifyContent="space-between"
@@ -54,13 +43,18 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
                 marginRight: 8,
                 alignSelf: "center",
               }}
-              source={{ uri: matchDetails.homeTeam.logoUrl }}
+              source={{
+                uri:
+                  matchDetails.homeTeam.logoUrl !== null
+                    ? matchDetails.homeTeam.logoUrl
+                    : undefined,
+              }}
             />
             <StyledText>{matchDetails.homeTeam.name}</StyledText>
           </StyledView>
 
           <StyledView mx={"s"}>
-            <StyledText>{scoreString}</StyledText>
+            <StyledText>{/*scoreString*/ "1:1"}</StyledText>
           </StyledView>
 
           <StyledView
@@ -77,7 +71,12 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
                 marginLeft: 8,
                 alignSelf: "center",
               }}
-              source={{ uri: matchDetails.awayTeam.logoUrl }}
+              source={{
+                uri:
+                  matchDetails.awayTeam.logoUrl !== null
+                    ? matchDetails.awayTeam.logoUrl
+                    : undefined,
+              }}
             />
           </StyledView>
         </StyledView>
@@ -88,7 +87,11 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
             flexGrow={1}
             justifyContent="flex-start"
           >
-            <StyledText>{oddsString}</StyledText>
+            <StyledText>
+              {matchDetails.scoreStats
+                ? matchDetails.scoreStats[0].ev
+                : "No Ev"}
+            </StyledText>
           </StyledView>
           <StyledView mx={"s"}>
             <StyledText>1:0</StyledText>

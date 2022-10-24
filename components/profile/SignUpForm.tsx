@@ -1,15 +1,11 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@shopify/restyle";
 import { Theme } from "../../styles/theme";
 import { StyledButton, StyledText, StyledView } from "../core";
 import { useForm, Controller } from "react-hook-form";
 import { TextField } from "../forms/TextField";
 import { useNavigation } from "@react-navigation/native";
-import { NestedStackScreenProps, RootStackScreenProps } from "../../types";
-import {
-  loginWithEmailAndPassword,
-  signUpWithEmail,
-} from "../../firebase/auth/authFunctions";
+import { NestedStackScreenProps } from "../../types";
+import { signUpWithEmail } from "../../firebase/auth/authFunctions";
 import { useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { useUser } from "../../firebase/auth/AuthContext";
@@ -144,8 +140,8 @@ export const SignUpForm = () => {
               message: "Please enter a password.",
             },
             minLength: {
-              value: 6,
-              message: "At least 6 characters required.",
+              value: 5,
+              message: "At least 5 characters required.",
             },
           }}
           render={({ field: { onBlur, onChange, value } }) => (

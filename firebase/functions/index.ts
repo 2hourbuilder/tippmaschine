@@ -10,6 +10,10 @@ import {
   UpdateOddsResults,
   GetSeasonParams,
   GetSeasonResults,
+  listCompetitionsParams,
+  listCompetitionsResults,
+  GetMyTipsParams,
+  GetMyTipsResults,
 } from "../../functionTypes";
 
 export const updateOdds = createFunctionURL<
@@ -30,3 +34,12 @@ export const addCompetition = createFunctionURL<
   AddCompetitionParams,
   AddCompetitionResults
 >("http://localhost:5001/tippmaschine-8fb2e/europe-west1/addcompetition");
+
+export const listCompetitions = createFunctionURL<
+  listCompetitionsParams,
+  listCompetitionsResults
+>("http://localhost:5001/tippmaschine-8fb2e/europe-west1/getallcompetitions");
+
+export const getMyTips = createFunctionURL<GetMyTipsParams, GetMyTipsResults>(
+  "http://localhost:5001/tippmaschine-8fb2e/europe-west1/getmytips"
+);

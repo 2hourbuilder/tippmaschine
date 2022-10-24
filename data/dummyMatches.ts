@@ -25,16 +25,19 @@ export const matches: Match[] = [
     homeTeam: brazil,
     id: "firstMatch",
     kickoff: new Date(2022, 11, 22, 18),
-    matchdayId: "firstMatchday",
-    odds: [
-      {
+    apiFixtureId: 1,
+    matchday: 1,
+    seasonId: "1",
+    odds: {
+      matchWinner: {
         awayWin: 2.42,
         draw: 3.1,
         homeWin: 1.96,
-        lastUpdate: new Date(),
-        providerName: "Test",
       },
-    ],
+      overUnder: null,
+      lastUpdate: new Date(),
+      providerName: "Kicktipp",
+    },
     score: {
       awayTeam: null,
       homeTeam: null,
@@ -46,16 +49,19 @@ export const matches: Match[] = [
     homeTeam: england,
     id: "secondMatch",
     kickoff: new Date(2022, 11, 23, 15),
-    matchdayId: "secondMatchday",
-    odds: [
-      {
-        awayWin: 1.42,
-        draw: 3.0,
-        homeWin: 2.96,
-        lastUpdate: new Date(),
-        providerName: "Test",
+    apiFixtureId: 1,
+    matchday: 1,
+    seasonId: "1",
+    odds: {
+      matchWinner: {
+        awayWin: 2.42,
+        draw: 3.1,
+        homeWin: 1.96,
       },
-    ],
+      overUnder: null,
+      lastUpdate: new Date(),
+      providerName: "Kicktipp",
+    },
     score: {
       awayTeam: null,
       homeTeam: null,
@@ -67,16 +73,19 @@ export const matches: Match[] = [
     homeTeam: brazil,
     id: "thirdMatch",
     kickoff: new Date(2022, 11, 23, 15),
-    matchdayId: "secondMatchday",
-    odds: [
-      {
-        awayWin: 2.1,
-        draw: 2.65,
-        homeWin: 1.85,
-        lastUpdate: new Date(),
-        providerName: "Test",
+    apiFixtureId: 1,
+    matchday: 1,
+    seasonId: "1",
+    odds: {
+      matchWinner: {
+        awayWin: 2.42,
+        draw: 3.1,
+        homeWin: 1.96,
       },
-    ],
+      overUnder: null,
+      lastUpdate: new Date(),
+      providerName: "Kicktipp",
+    },
     score: {
       awayTeam: null,
       homeTeam: null,

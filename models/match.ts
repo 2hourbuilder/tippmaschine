@@ -1,3 +1,4 @@
+import { MatchPointsRule } from "./competition";
 import { Team } from "./team";
 
 export interface Score {
@@ -16,6 +17,12 @@ export interface Odds {
   lastUpdate: Date;
 }
 
+export interface ScoreStats {
+  score: Score;
+  prob: number;
+  ev: number;
+}
+
 export interface Match {
   id: string | null;
   kickoff: Date;
@@ -29,7 +36,22 @@ export interface Match {
   seasonId: string;
 }
 
+export interface MatchShort {
+  kickoff: Date;
+  seasonId: string;
+  matchId: string;
+  homeTeam: Team;
+  awayTeam: Team;
+  score: Score;
+  //competition-specific below
+  scoreStats: ScoreStats[] | null;
+  pointsRule: MatchPointsRule;
+  submitDate: Date;
+  competitionMatchDay: number;
+  tippspielId: string | null;
+}
+
 export interface MatchGroupItem {
   title: string;
-  data: Match[];
+  data: MatchShort[];
 }

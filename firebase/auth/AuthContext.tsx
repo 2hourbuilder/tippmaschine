@@ -5,6 +5,7 @@ import { auth } from "../setup";
 import { cloneDeep } from "lodash";
 import { profilesCol } from "../firestore/helper";
 import { Profile } from "../../models/profile";
+import { useLocalStorage } from "../../localStorage/localStorageContext";
 
 interface AuthContextStructure {
   user: User | null;
@@ -15,9 +16,13 @@ interface AuthContextStructure {
 const AuthContext = createContext<AuthContextStructure>({
   user: null,
   profile: {
-    settings: { appearance: "system", language: "en-US" },
+    settings: {
+      appearance: "system",
+      language: "en-US",
+    },
     myCompetitions: [],
     username: undefined,
+    loginToken: undefined,
   },
   updateUser: async () => {},
 });
@@ -31,6 +36,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | undefined>();
+  const { async } = useLocalStorage();
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (!firebaseUser) {
@@ -52,8 +58,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const profileListener = onSnapshot(
           doc(profilesCol, user.uid),
           (doc) => {
-            const profile = doc.data();
-            setProfile(profile);
+            const newProfile = doc.data();
+            setProfile(newProfile);
           }
         );
         return profileListener;

@@ -19,6 +19,7 @@ const gettippspielids = async (
   const $ = cheerio.load(response.data);
 
   const matchRows = $("#tippabgabeSpiele").find("tbody").children().toArray();
+  if (matchRows.length === 0) return [];
   const dataRows = matchRows.filter((row) => $(row).children().length > 3);
   let lastSubmitDate = parseKicktippDate(
     $($(dataRows[0]).children().toArray()[0]).text()

@@ -1,12 +1,17 @@
-import { StyledButton, StyledView } from "../../components/core";
+import { StyledButton, StyledText, StyledView } from "../../components/core";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import MatchesList from "../../components/matches/MatchesList";
 import { matchesGrouped } from "../../data/dummyMatches";
+import { useMyFirestore } from "../../firebase/firestore/FirestoreContext";
 import {
   addCompetition,
   getLoginToken,
+  getMyTips,
   getSeason,
   updateOdds,
 } from "../../firebase/functions";
+import { groupMatchesByDate } from "../../helpers/functions/groupMatchesByDate";
+import { useLocalStorage } from "../../localStorage/localStorageContext";
 import { NestedStackScreenProps } from "../../types";
 
 const createSeasonHandler = async () => {
@@ -46,27 +51,50 @@ const addCompetitionHandler = async () => {
     password: "chrisi",
   });
   const result = await addCompetition({
-    kurzname: "cnbbuli",
+    kurzname: "tippmaschine-wm22",
     loginToken: token.loginToken!,
   });
   alert(JSON.stringify(result));
 };
 
 const testFunctionHandler = async () => {
-  const result = null;
+  const token = await getLoginToken({
+    username: "christopher@schaumloeffel.de",
+    password: "chrisi",
+  });
+  const result = await getMyTips({
+    kurzname: "tippmaschine-buli22",
+    loginToken: token.loginToken!,
+    matchdays: [3],
+    tippSaisonId: "1194753",
+  });
   alert(JSON.stringify(result));
 };
 
 export default function MatchlistScreen({
   navigation,
 }: NestedStackScreenProps<"MatchDetail", "MatchesTab">) {
+  const storage = useLocalStorage();
+  const { matchdays } = useMyFirestore();
+  const newmatchesGrouped = [];
+
+  if (matchdays.length !== 0) {
+    matchdays.forEach((matchday) => {
+      newmatchesGrouped.push(groupMatchesByDate(matchday.matchesShorts));
+    });
+  }
   return (
     <StyledView px={"m"}>
       <MatchesList matchesGrouped={matchesGrouped} />
       <StyledButton label="Create Season" onPress={createSeasonHandler} />
       <StyledButton label="Get Odds" onPress={getOddsHandler} />
       <StyledButton label="Add competition" onPress={addCompetitionHandler} />
-      <StyledButton label="Find lambda" onPress={testFunctionHandler} />
+      <StyledButton label="Get My tips" onPress={testFunctionHandler} />
+      <StyledButton
+        label="Reset onboarding"
+        onPress={async () => storage.async.updateOnboardingStatus("first")}
+      />
+      <StyledText>{`Id: ${storage.async.selectedCompetitionId}`}</StyledText>
     </StyledView>
   );
 }

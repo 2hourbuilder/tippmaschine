@@ -7,7 +7,7 @@ interface MatchGroupHeaderProps {
 
 const MatchGroupHeader = ({ section }: MatchGroupHeaderProps) => {
   return (
-    <StyledView bg={"mainBackground"} pt={"m"}>
+    <StyledView pt={"m"}>
       <StyledText variant={"subheader"}>{section.title}</StyledText>
     </StyledView>
   );

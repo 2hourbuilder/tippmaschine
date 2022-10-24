@@ -3,7 +3,7 @@ import { StyledText, StyledView } from "../../components/core";
 import { Text, View } from "../../components/Themed";
 import { dummyCompetition1 } from "../../data/dummyCompetitions";
 import { dummyUser1 } from "../../data/dummyUser";
-import { useCompetition } from "../../firebase/firestore/CompetitionContext";
+import { useMyFirestore } from "../../firebase/firestore/FirestoreContext";
 import { NestedStackScreenProps } from "../../types";
 
 interface CompetitionScreenProps {
@@ -18,13 +18,11 @@ export default function CompetitionScreen({
   navigation,
   route,
 }: CompetitionScreenProps) {
-  const firestoreCompetition = useCompetition();
-  const myCompetition = dummyUser1.myCompetitions[0];
   const competition = dummyCompetition1;
   return (
     <StyledView px={"m"}>
       <StyledText variant={"header"} textAlign="center" paddingVertical={"m"}>
-        {firestoreCompetition ? firestoreCompetition.name : ""}
+        Test
       </StyledText>
       <StyledText variant={"subheader"}>Scoring board</StyledText>
       <View
@@ -35,7 +33,7 @@ export default function CompetitionScreen({
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("CompetitionSettings", {
-            competitionId: competition.id,
+            competitionId: competition.id!,
           })
         }
       >

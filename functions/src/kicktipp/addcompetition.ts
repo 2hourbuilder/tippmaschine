@@ -7,21 +7,23 @@ import {
   HttpsError,
   onCall,
 } from "firebase-functions/v2/https";
-import { AddCompetitionParams } from "../../../functionTypes";
+import {
+  AddCompetitionParams,
+  AddCompetitionResults,
+} from "../../../functionTypes";
 import {
   Competition,
   MatchDay,
   MatchPointsRule,
-  MatchShort,
 } from "../../../models/competition";
-import { Match } from "../../../models/match";
+import { Match, MatchShort } from "../../../models/match";
 import getMatchesBySeasonId from "../firestore/getMatchesBySeasonId";
 import { db, parseKicktippDate } from "../util";
 import getCompetitionPointRules from "./internal/getCompetitionPointRules";
 import getCompetitionSeasons from "./internal/getCompetitionSeasons";
 import getNumberOfMatchdays from "./internal/getNumberOfMatchdays";
-import calculateScoreProbs from "../odds/calculateScoreProbs";
 import gettippspielids from "./internal/getTippspielId";
+import calculateScoreStats from "../odds/calculateScoreStats";
 
 const addcompetition = onCall(
   { region: "europe-west1" },
@@ -161,7 +163,7 @@ const addcompetition = onCall(
         tippSaisonId
       );
 
-      const matchesShort = await Promise.all(
+      const matchesShortRaw = await Promise.all(
         matchRows
           .map(async (matchRow) => {
             const kickoff = parseKicktippDate(
@@ -235,11 +237,14 @@ const addcompetition = onCall(
                 kickoff: kickoff,
                 seasonId: match.seasonId,
                 matchId: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                score: match.score,
                 competitionMatchDay: matchDayIndex,
                 pointsRule: pointsRule,
                 submitDate: submitDate,
                 odds: match.odds,
-                scoreProbs: calculateScoreProbs(match.odds, pointsRule, 9),
+                scoreStats: calculateScoreStats(match.odds, pointsRule, 9),
                 tippspielId: tippspielId ? tippspielId : null,
               } as MatchShort;
             } else {
@@ -248,16 +253,32 @@ const addcompetition = onCall(
           })
           .filter((m): m is Promise<MatchShort> => m !== null)
       );
+      const matchesShort = matchesShortRaw
+        .filter((m) => m)
+        .sort((a, b) => a.kickoff.getTime() - b.kickoff.getTime());
+      matchesShort.forEach((m) => {
+        if (!m) {
+          console.log("Missing!!!");
+        }
+      });
       return {
         index: matchDayIndex,
         name: matchdayName,
         matchesShorts: matchesShort,
+        complete: matchesShort.find(
+          (match) => match.kickoff.getTime() >= new Date().getTime()
+        )
+          ? false
+          : true,
+        firstKickoff:
+          matchesShort.length > 0
+            ? matchesShort[0].kickoff
+            : new Date(2000, 1, 1),
       } as MatchDay;
     };
 
     try {
       const name = await addcompetitionName();
-      const tippsaisonId = tippSaisonId;
       const seasons = await getCompetitionSeasons(kurzname, loginToken);
       const numberOfMatchdays = await getNumberOfMatchdays(
         kurzname,
@@ -271,7 +292,7 @@ const addcompetition = onCall(
         name: name,
         pointsRules: pointRules,
         seasonIds: seasons.map((s) => s.id),
-        bettingGroupId: tippsaisonId,
+        tippsaisonId: tippSaisonId,
         kurzname: kurzname,
       };
       const matchdays = await Promise.all(
@@ -286,12 +307,10 @@ const addcompetition = onCall(
       );
 
       return {
-        name: name,
-        seasons: seasons,
-        compId: competitionId,
-        competition: JSON.stringify(competition),
-        number: allMatches.length,
-      };
+        competitionId: competitionId,
+        kurzname: kurzname,
+        tippsaisonId: tippSaisonId,
+      } as AddCompetitionResults;
     } catch (error) {
       logger.error("Could not add competition", error);
       throw new HttpsError("internal", "Could not add competition", error);

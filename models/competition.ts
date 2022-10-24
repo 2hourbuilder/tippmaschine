@@ -1,4 +1,4 @@
-import { Odds, Score } from "./match";
+import { MatchShort } from "./match";
 
 export interface MatchPointsRule {
   name: string;
@@ -22,26 +22,12 @@ export interface MatchPointsRule {
   fixedPointsRule?: number;
 }
 
-export interface ScoreProb {
-  score: Score;
-  prob: number;
-}
-
-export interface MatchShort {
-  seasonId: string;
-  matchId: string;
-  pointsRule: MatchPointsRule;
-  submitDate: Date;
-  competitionMatchDay: number;
-  scoreProbs: ScoreProb[] | undefined;
-  odds: Odds;
-  tippspielId: string | null;
-}
-
 export interface MatchDay {
   index: number;
   name: string;
   matchesShorts: MatchShort[];
+  complete: boolean;
+  firstKickoff: Date;
 }
 
 export interface Player {
@@ -62,5 +48,5 @@ export interface Competition {
   //mode?: string;
   //provider: "Kicktipp";
   seasonIds: string[];
-  bettingGroupId: string;
+  tippsaisonId: string;
 }

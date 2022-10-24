@@ -6,30 +6,37 @@ import { ControllerRenderProps, FieldError, Ref } from "react-hook-form";
 type TextFieldProps = ControllerRenderProps &
   TextInputProps & {
     label?: string | undefined;
+    onColor?: boolean | undefined;
     error: FieldError | undefined;
   };
 
 export const TextField = forwardRef<Ref, TextFieldProps>(
-  ({ onBlur, onChange, value, label, error, ...props }, ref) => {
+  ({ onBlur, onChange, value, label, onColor, error, ...props }, ref) => {
     const [isFocused, setIsFocused] = useState(false);
     return (
       <StyledView width="100%" mb={"s"}>
         {label ? (
-          <StyledText variant={"formLabel"} mb={"xs"}>
+          <StyledText
+            variant={"formLabel"}
+            color={onColor ? "textOnColor" : "textPrimary"}
+            mb={"xs"}
+          >
             {label}
           </StyledText>
         ) : null}
         <StyledView
-          px="m"
-          pt="s"
-          pb="m"
-          backgroundColor={"navigationHeader"}
+          p="m"
+          backgroundColor={onColor ? "accentTertiary" : "navigationHeader"}
           borderRadius="m"
           borderColor={
             error
               ? "accentPrimary"
               : isFocused
-              ? "borderPrimary"
+              ? onColor
+                ? "accentPrimary"
+                : "borderPrimary"
+              : onColor
+              ? "accentTertiary"
               : "mainBackground"
           }
           borderWidth={2}
@@ -40,11 +47,15 @@ export const TextField = forwardRef<Ref, TextFieldProps>(
             value={value}
             onFocus={() => setIsFocused(true)}
             onEndEditing={() => setIsFocused(false)}
+            variant="inputField"
             {...props}
           />
         </StyledView>
         <StyledView height={20}>
-          <StyledText variant={"errorMessage"}>
+          <StyledText
+            variant={"errorMessage"}
+            color={onColor ? "textOnColor" : undefined}
+          >
             {error ? error.message : ""}
           </StyledText>
         </StyledView>

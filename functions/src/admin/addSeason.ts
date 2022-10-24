@@ -378,15 +378,17 @@ const addseason = onCall(
         { length: await getNumberOfMatchdays(kurzname, loginToken) },
         (_, i) => i + 1
       );
-      const matches = [] as Match[];
-      await matchDays.reduce(async (p, matchday) => {
-        const match = await p;
-        if (match[0].kickoff) {
-          matches.push(...match);
-        }
-        return getMatchesOfMatchDay(matchday, season);
-      }, Promise.resolve([{}] as Match[]));
-      return matches;
+      const allMatches = await Promise.all(
+        matchDays
+          .map(async (matchday) => {
+            const matches = await getMatchesOfMatchDay(matchday, season);
+            if (matches[0].kickoff) {
+              return matches;
+            } else return null;
+          })
+          .filter((m): m is Promise<Match[]> => m != null)
+      );
+      return allMatches.flat();
     };
 
     try {

@@ -7,6 +7,15 @@ export interface GetLoginTokenResults {
   loginToken: string | undefined;
 }
 
+export interface listCompetitionsParams {
+  loginToken: string;
+}
+
+export type listCompetitionsResults = {
+  kurzname: string;
+  name: string;
+}[];
+
 export interface AddCompetitionParams {
   loginToken: string;
   kurzname: string;
@@ -14,7 +23,25 @@ export interface AddCompetitionParams {
 
 export interface AddCompetitionResults {
   competitionId: string;
+  tippsaisonId: string;
+  kurzname: string;
 }
+
+export interface GetMyTipsParams {
+  loginToken: string;
+  kurzname: string;
+  tippSaisonId: string;
+  matchdays: number[];
+}
+
+export type GetMyTipsResults = {
+  matchday: number;
+  myTips: {
+    tippspielId: string | undefined;
+    homeTip: number | null;
+    awayTip: number | null;
+  }[];
+}[];
 
 export type GetSeasonParams = {
   kurzname: string;

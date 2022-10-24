@@ -4,6 +4,8 @@ import getseason from "./admin/addSeason";
 import "dotenv/config";
 import updateodds from "./admin/updateOdds";
 import addcompetition from "./kicktipp/addcompetition";
+import getallcompetitions from "./kicktipp/getallcompetitions";
+import getmytips from "./kicktipp/getmytips";
 
 const app = admin.initializeApp();
 export const firestore = app.firestore();
@@ -12,3 +14,5 @@ exports.getlogintoken = getlogintoken;
 exports.getseason = getseason;
 exports.addcompetition = addcompetition;
 exports.updateodds = updateodds;
+exports.getallcompetitions = getallcompetitions;
+exports.getmytips = getmytips;

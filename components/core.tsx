@@ -32,12 +32,22 @@ export const StyledButton = ({ label, children, ...props }: Props) => {
   );
 };
 
-export const StyledButtonNoColor = ({ label, color, ...props }: Props) => {
+export const StyledButtonNoColor = ({
+  label,
+  color,
+  children,
+  ...props
+}: Props) => {
   return (
     <BaseButton flexDirection="row" {...props}>
       <StyledText color={color}>{label}</StyledText>
+      {children}
     </BaseButton>
   );
+};
+
+export const StyledTouchable = ({ children, ...props }: Props) => {
+  return <BaseButton {...props}>{children}</BaseButton>;
 };
 
 // Customized TextInput

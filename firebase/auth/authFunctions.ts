@@ -17,6 +17,8 @@ import {
   deleteProfile,
   initializeProfile,
 } from "../firestore/profileFunctions";
+import { getLoginToken, listCompetitions } from "../functions";
+import { MyCompetition } from "../../models/profile";
 
 export const signUpWithEmail = async (
   username: string,
@@ -24,17 +26,28 @@ export const signUpWithEmail = async (
   password: string
 ) => {
   const user = auth.currentUser;
-  const credential = EmailAuthProvider.credential(email, password);
+  const fbPassword = password + "kt";
+  const credential = EmailAuthProvider.credential(email, fbPassword);
   try {
     if (user) {
       // create account
       await linkWithCredential(user, credential); // link with existing anonymous account or
     } else {
-      await createUserWithEmailAndPassword(auth, email, password); // create new (shouldn't be triggered as always anonymous)
+      await createUserWithEmailAndPassword(auth, email, fbPassword); // create new
     }
     if (user) {
       // initialize user profile
-      await initializeProfile(user, username);
+      const token = await getLoginToken({
+        username: email,
+        password: password,
+      });
+      if (token.loginToken) {
+        await initializeProfile(user, username, token.loginToken);
+      } else {
+        throw new Error(
+          "Falsche Logindaten für Kicktipp. Bitte prüfe nochmal."
+        );
+      }
     }
   } catch (error) {
     const authError = error as AuthError;
@@ -53,7 +66,7 @@ export const loginWithEmailAndPassword = async (
   password: string
 ) => {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email, password + "kt");
   } catch (error) {
     const authError = error as AuthError;
     switch (authError.code) {
@@ -125,8 +138,8 @@ export const deleteAccount = async (
         afterReauthentication === undefined
       ) {
         console.log("Reauthenticating");
-        await reAuthenticate(password);
-        await deleteAccount(password, true);
+        await reAuthenticate(password + "kt");
+        await deleteAccount(password + "kt", true);
       }
       console.log(authError);
       throw Error("User account could not be deleted. Please contact support.");
@@ -141,14 +154,14 @@ export const changePassword = async (
 ) => {
   if (auth.currentUser) {
     try {
-      await updatePassword(auth.currentUser, newPassword);
+      await updatePassword(auth.currentUser, newPassword + "kt");
     } catch (error) {
       const authError = error as AuthError;
       switch (authError.code) {
         case AuthErrorCodes.CREDENTIAL_TOO_OLD_LOGIN_AGAIN:
           if (afterReauthentication === undefined) {
-            await reAuthenticate(password);
-            await changePassword(password, newPassword, true);
+            await reAuthenticate(password + "kt");
+            await changePassword(password + "kt", newPassword + "kt", true);
           }
           break;
         case AuthErrorCodes.INVALID_PASSWORD:
@@ -165,7 +178,7 @@ export const reAuthenticate = async (password: string) => {
     if (auth.currentUser.email) {
       const credential = EmailAuthProvider.credential(
         auth.currentUser.email,
-        password
+        password + "kt"
       );
       try {
         await reauthenticateWithCredential(auth.currentUser, credential);
