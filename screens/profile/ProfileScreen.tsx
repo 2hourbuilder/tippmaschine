@@ -2,12 +2,14 @@ import { StyledButton, StyledText, StyledView } from "../../components/core";
 import { SignInForm } from "../../components/profile/SignInForm";
 import { useUser } from "../../firebase/auth/AuthContext";
 import { logout } from "../../firebase/auth/authFunctions";
+import { useLocalStorage } from "../../localStorage/localStorageContext";
 import { NestedStackScreenProps } from "../../types";
 
 export default function ProfileScreen({
   navigation,
 }: NestedStackScreenProps<"Profile", "ProfileTab">) {
   const { user, profile } = useUser();
+  const { async } = useLocalStorage();
 
   if (user === null) {
     return <SignInForm />;
@@ -30,6 +32,10 @@ export default function ProfileScreen({
       <StyledButton
         label="Delete account"
         onPress={async () => navigation.navigate("DeleteAccount")}
+      />
+      <StyledButton
+        label="Reset onboarding"
+        onPress={async () => async.updateOnboardingStatus("first")}
       />
     </StyledView>
   );

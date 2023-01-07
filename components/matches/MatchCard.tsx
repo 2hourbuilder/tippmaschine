@@ -1,8 +1,9 @@
-import { Image, TouchableOpacity } from "react-native";
+import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { NestedStackScreenProps } from "../../types";
 import { StyledText, StyledView } from "../core";
 import { useNavigation } from "@react-navigation/native";
 import { MatchShort } from "../../models/match";
+import BoxContainer from "./BoxContainer";
 
 interface MatchCardProps {
   matchDetails: MatchShort;
@@ -13,6 +14,10 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
     useNavigation<
       NestedStackScreenProps<"MatchDetail", "MatchesTab">["navigation"]
     >();
+  const windowWidth = useWindowDimensions().width;
+  const topTips = matchDetails.scoreStats
+    ?.sort((a, b) => b.ev - a.ev)
+    .slice(0, 3);
   return (
     <TouchableOpacity
       onPress={() =>
@@ -24,86 +29,59 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
       }
       activeOpacity={0.8}
     >
-      <StyledView borderRadius={"l"} padding="s" marginVertical={"s"}>
+      <StyledView
+        borderRadius={"l"}
+        marginVertical={"s"}
+        flexDirection="row"
+        backgroundColor={"cardPrimaryBackground"}
+        p="s"
+        justifyContent={"flex-end"}
+      >
         <StyledView
-          flexDirection="row"
-          justifyContent="space-between"
-          paddingBottom={"s"}
+          flexDirection={"column"}
+          flexGrow={1}
+          maxWidth={windowWidth - 216 - 32 - 20}
         >
-          <StyledView
-            flexBasis={0}
-            flexDirection="row"
-            flexGrow={1}
-            justifyContent="flex-end"
-          >
-            <Image
-              style={{
-                height: 16,
-                width: 24,
-                marginRight: 8,
-                alignSelf: "center",
-              }}
-              source={{
-                uri:
-                  matchDetails.homeTeam.logoUrl !== null
-                    ? matchDetails.homeTeam.logoUrl
-                    : undefined,
-              }}
-            />
-            <StyledText>{matchDetails.homeTeam.name}</StyledText>
+          <StyledView flexDirection={"row"}>
+            <StyledView flexShrink={1}>
+              <StyledText numberOfLines={1}>
+                {matchDetails.homeTeam.name}
+              </StyledText>
+            </StyledView>
+            <StyledView
+              flexDirection={"row"}
+              flexGrow={1}
+              justifyContent="flex-end"
+              mr={"s"}
+              minWidth={20}
+            >
+              <StyledText textAlign={"center"}>1</StyledText>
+            </StyledView>
           </StyledView>
-
-          <StyledView mx={"s"}>
-            <StyledText>{/*scoreString*/ "1:1"}</StyledText>
-          </StyledView>
-
-          <StyledView
-            flexBasis={0}
-            flexDirection="row"
-            flexGrow={1}
-            justifyContent="flex-start"
-          >
-            <StyledText>{matchDetails.awayTeam.name}</StyledText>
-            <Image
-              style={{
-                height: 16,
-                width: 24,
-                marginLeft: 8,
-                alignSelf: "center",
-              }}
-              source={{
-                uri:
-                  matchDetails.awayTeam.logoUrl !== null
-                    ? matchDetails.awayTeam.logoUrl
-                    : undefined,
-              }}
-            />
+          <StyledView flexDirection={"row"}>
+            <StyledView flexShrink={1}>
+              <StyledText numberOfLines={1}>
+                {matchDetails.awayTeam.name}
+              </StyledText>
+            </StyledView>
+            <StyledView
+              flexDirection={"row"}
+              flexGrow={1}
+              justifyContent="flex-end"
+              mr={"s"}
+              minWidth={20}
+            >
+              <StyledText>2</StyledText>
+            </StyledView>
           </StyledView>
         </StyledView>
-        <StyledView flexDirection="row" justifyContent="space-between">
-          <StyledView
-            flexBasis={0}
-            flexDirection="row"
-            flexGrow={1}
-            justifyContent="flex-start"
-          >
-            <StyledText>
-              {matchDetails.scoreStats
-                ? matchDetails.scoreStats[0].ev
-                : "No Ev"}
-            </StyledText>
-          </StyledView>
-          <StyledView mx={"s"}>
-            <StyledText>1:0</StyledText>
-          </StyledView>
-          <StyledView
-            flexDirection={"row"}
-            flexBasis={0}
-            flexGrow={1}
-            justifyContent="flex-end"
-          >
-            <StyledText>Exp. points: 2.44</StyledText>
-          </StyledView>
+        <StyledView alignItems={"center"} justifyContent="center">
+          {topTips && matchDetails.tippspielId ? (
+            <BoxContainer
+              topTips={topTips}
+              tippspielId={matchDetails.tippspielId}
+            />
+          ) : null}
         </StyledView>
       </StyledView>
     </TouchableOpacity>

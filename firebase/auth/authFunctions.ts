@@ -18,48 +18,6 @@ import {
   initializeProfile,
 } from "../firestore/profileFunctions";
 import { getLoginToken, listCompetitions } from "../functions";
-import { MyCompetition } from "../../models/profile";
-
-export const signUpWithEmail = async (
-  username: string,
-  email: string,
-  password: string
-) => {
-  const user = auth.currentUser;
-  const fbPassword = password + "kt";
-  const credential = EmailAuthProvider.credential(email, fbPassword);
-  try {
-    if (user) {
-      // create account
-      await linkWithCredential(user, credential); // link with existing anonymous account or
-    } else {
-      await createUserWithEmailAndPassword(auth, email, fbPassword); // create new
-    }
-    if (user) {
-      // initialize user profile
-      const token = await getLoginToken({
-        username: email,
-        password: password,
-      });
-      if (token.loginToken) {
-        await initializeProfile(user, username, token.loginToken);
-      } else {
-        throw new Error(
-          "Falsche Logindaten für Kicktipp. Bitte prüfe nochmal."
-        );
-      }
-    }
-  } catch (error) {
-    const authError = error as AuthError;
-    console.log(user, authError);
-    switch (authError.code) {
-      case AuthErrorCodes.EMAIL_EXISTS:
-        throw Error("This email already exists. Please login.", authError);
-      default:
-        throw Error("Signup not successful.", authError);
-    }
-  }
-};
 
 export const loginWithEmailAndPassword = async (
   email: string,
@@ -90,6 +48,58 @@ export const loginWithEmailAndPassword = async (
         });
       default:
         throw Error("Login not successful.", { cause: authError });
+    }
+  }
+};
+
+export const signUpWithEmail = async (
+  username: string,
+  email: string,
+  password: string
+) => {
+  const user = auth.currentUser;
+  const fbPassword = password + "kt";
+  const credential = EmailAuthProvider.credential(email, fbPassword);
+  try {
+    console.log("User: ", user?.uid);
+    if (user) {
+      // check if account exists and try to login
+      try {
+        await loginWithEmailAndPassword(email, password);
+        console.log("Login successful!");
+      } catch (error) {
+        console.log("Login not possible. Signing up", error);
+      }
+      // create account
+      if (user.isAnonymous) {
+        await linkWithCredential(user, credential); // link with existing anonymous account or
+      }
+    } else {
+      await createUserWithEmailAndPassword(auth, email, fbPassword); // create new
+    }
+    if (user) {
+      // initialize user profile
+      const token = await getLoginToken({
+        username: email,
+        password: password,
+      });
+      if (token.loginToken) {
+        await initializeProfile(user, username, token.loginToken);
+      } else {
+        throw new Error(
+          "Falsche Logindaten für Kicktipp. Bitte prüfe nochmal."
+        );
+      }
+    }
+  } catch (error) {
+    console.log("Signup error:", error);
+    const authError = error as AuthError;
+    console.log(user?.uid, authError);
+    switch (authError.code) {
+      case AuthErrorCodes.EMAIL_EXISTS:
+        throw Error("This email already exists. Please login.", authError);
+      default:
+        throw Error("Signup not successful.", authError);
     }
   }
 };

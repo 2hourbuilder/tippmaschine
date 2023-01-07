@@ -1,7 +1,6 @@
+import { useEffect } from "react";
 import { StyledButton, StyledText, StyledView } from "../../components/core";
-import LoadingSpinner from "../../components/LoadingSpinner";
 import MatchesList from "../../components/matches/MatchesList";
-import { matchesGrouped } from "../../data/dummyMatches";
 import { useMyFirestore } from "../../firebase/firestore/FirestoreContext";
 import {
   addCompetition,
@@ -12,6 +11,7 @@ import {
 } from "../../firebase/functions";
 import { groupMatchesByDate } from "../../helpers/functions/groupMatchesByDate";
 import { useLocalStorage } from "../../localStorage/localStorageContext";
+import { MatchGroupItem } from "../../models/match";
 import { NestedStackScreenProps } from "../../types";
 
 const createSeasonHandler = async () => {
@@ -27,19 +27,7 @@ const createSeasonHandler = async () => {
       apiSeason: "2022",
     });
 
-    alert(JSON.stringify(season.seasonName.de));
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const getOddsHandler = async () => {
-  try {
-    const result = await updateOdds({
-      fromDaysInFuture: 1,
-      untilDaysInFuture: 30,
-    });
-    alert(JSON.stringify(result));
+    alert(JSON.stringify(season.seasonName));
   } catch (err) {
     console.log(err);
   }
@@ -76,18 +64,17 @@ export default function MatchlistScreen({
 }: NestedStackScreenProps<"MatchDetail", "MatchesTab">) {
   const storage = useLocalStorage();
   const { matchdays } = useMyFirestore();
-  const newmatchesGrouped = [];
+  let newmatchesGrouped: MatchGroupItem[] = [];
 
   if (matchdays.length !== 0) {
     matchdays.forEach((matchday) => {
-      newmatchesGrouped.push(groupMatchesByDate(matchday.matchesShorts));
+      newmatchesGrouped.push(...groupMatchesByDate(matchday.matchesShorts));
     });
   }
+
   return (
     <StyledView px={"m"}>
-      <MatchesList matchesGrouped={matchesGrouped} />
-      <StyledButton label="Create Season" onPress={createSeasonHandler} />
-      <StyledButton label="Get Odds" onPress={getOddsHandler} />
+      <MatchesList matchesGrouped={newmatchesGrouped} />
       <StyledButton label="Add competition" onPress={addCompetitionHandler} />
       <StyledButton label="Get My tips" onPress={testFunctionHandler} />
       <StyledButton

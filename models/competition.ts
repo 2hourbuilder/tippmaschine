@@ -40,6 +40,7 @@ export interface Competition {
   name: string;
   kurzname: string;
   matchdays?: MatchDay[];
+  currentMatchday: number;
   //players: Player[];
   pointsRules: MatchPointsRule[];
   //numberOfMatches: number;

@@ -1,14 +1,14 @@
-import { MatchShort } from "../../models/competition";
+import { MatchShort } from "../../models/match";
 import { MatchGroupItem } from "../../models/match";
 
 export const groupMatchesByDate = (matchesList: MatchShort[]) => {
   const groupedMatches: MatchGroupItem[] = [];
   matchesList.forEach((match) => {
-    const kickoffString = `${match.kickoff.toLocaleString("en-US", {
-      month: "long",
+    const kickoffString = `${match.kickoff.toLocaleString("de-DE", {
+      month: "2-digit",
       day: "2-digit",
+      year: "numeric",
       hour: "numeric",
-      hour12: true,
       minute: "2-digit",
     })}`;
     const index: number = groupedMatches.findIndex(

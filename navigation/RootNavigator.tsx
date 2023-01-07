@@ -29,6 +29,7 @@ export default function RootNavigator() {
   const onboardingStatus = storage.async
     .onboardingStatus as OnboardingStatusValues;
 
+  console.log(user);
   if (storage.isLoading) {
     return (
       <StyledView

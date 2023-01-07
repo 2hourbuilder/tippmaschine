@@ -184,7 +184,7 @@ const addcompetition = onCall(
 
             const match = allMatches.find(
               (m) =>
-                m.homeTeam.name.de === homeTeamName &&
+                m.homeTeam.name === homeTeamName &&
                 m.kickoff.valueOf() === kickoff.valueOf()
             );
             if (match) {
@@ -229,7 +229,7 @@ const addcompetition = onCall(
                 tippspielId = sameSubmitDate[0].tippspielId;
               } else {
                 tippspielId = sameSubmitDate.find(
-                  (t) => t.homeTeamName === match.homeTeam.name.de
+                  (t) => t.homeTeamName === match.homeTeam.name
                 )?.tippspielId;
               }
 
@@ -243,7 +243,6 @@ const addcompetition = onCall(
                 competitionMatchDay: matchDayIndex,
                 pointsRule: pointsRule,
                 submitDate: submitDate,
-                odds: match.odds,
                 scoreStats: calculateScoreStats(match.odds, pointsRule, 9),
                 tippspielId: tippspielId ? tippspielId : null,
               } as MatchShort;
@@ -294,6 +293,7 @@ const addcompetition = onCall(
         seasonIds: seasons.map((s) => s.id),
         tippsaisonId: tippSaisonId,
         kurzname: kurzname,
+        currentMatchday: 1,
       };
       const matchdays = await Promise.all(
         matchDayIndices.map(
@@ -301,6 +301,17 @@ const addcompetition = onCall(
             await addMatchDay(matchDayIndex, allMatches, pointRules)
         )
       );
+      const upcomingMatchdays = matchdays.filter((m) => m.complete === false);
+      if (upcomingMatchdays.length === 0) {
+        competition.currentMatchday = matchdays.sort(
+          (a, b) => b.index - a.index
+        )[0].index;
+      } else {
+        competition.currentMatchday = upcomingMatchdays.sort(
+          (a, b) => a.index - b.index
+        )[0].index;
+      }
+
       const competitionId = await writeCompetitionToFirestore(
         competition,
         matchdays

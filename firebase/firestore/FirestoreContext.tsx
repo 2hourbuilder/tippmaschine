@@ -6,6 +6,7 @@ import {
   Unsubscribe,
   query,
   where,
+  Timestamp,
 } from "firebase/firestore";
 import { firestore } from "../setup";
 import { Competition, MatchDay } from "../../models/competition";
@@ -61,7 +62,21 @@ export const FirestoreProvider = ({
       (query) => {
         if (!query.empty) {
           const newMatchdays = [...matchdaysData];
-          newMatchdays.push(query.docs[0].data());
+          const newMatchday = query.docs[0].data();
+          const firstKickoff = newMatchday.firstKickoff as unknown;
+          const firstKickoffTS = firstKickoff as Timestamp;
+          newMatchday.firstKickoff = firstKickoffTS.toDate();
+          const matchesWithDates = newMatchday.matchesShorts.map((match) => {
+            const kickoff = match.kickoff as unknown;
+            const submitDate = match.submitDate as unknown;
+            const kickoffTS = kickoff as Timestamp;
+            const submitDateTS = submitDate as Timestamp;
+            match.kickoff = kickoffTS.toDate();
+            match.submitDate = submitDateTS.toDate();
+            return match;
+          });
+          newMatchday.matchesShorts = matchesWithDates;
+          newMatchdays.push(newMatchday);
           setMatchdaysData(newMatchdays);
         }
       }
@@ -72,7 +87,7 @@ export const FirestoreProvider = ({
   useEffect(() => {
     if (competition?.id) {
       setMatchdaysData([]);
-      addMatchday(competition.id, 10);
+      addMatchday(competition.id, competition.currentMatchday);
     }
   }, [competition]);
 

@@ -22,7 +22,7 @@ const updateodds = onCall(
     - update odds from API or kicktipp as backup as API only serves odds data <14 days before kick-off
 
     Logic:
-    - get all Seasons with at least this year as startyear
+    - get all Seasons with property 'active' set to true
     - for each active season:
       - get all matches in time interval from these seasons
       - for each match:
@@ -32,6 +32,7 @@ const updateodds = onCall(
 
     const fromDaysInFuture = data.data.fromDaysInFuture;
     const untilDaysInFuture = data.data.untilDaysInFuture;
+    const loginToken = data.data.loginToken;
 
     const startDate = fromDaysInFuture
       ? dayjs().add(fromDaysInFuture, "day").toDate()
@@ -42,7 +43,7 @@ const updateodds = onCall(
 
     const getActiveSeasons = async () => {
       const seasonSnapshots = await db()
-        .seasons.where("startYear", ">=", new Date().getFullYear())
+        .seasons.where("active", "==", true)
         .get();
       const seasons = seasonSnapshots.docs.map((doc) => {
         const season = doc.data();
@@ -70,7 +71,7 @@ const updateodds = onCall(
         matchesSnapshot?.docs.forEach((match) =>
           matchData.push({
             id: match.id,
-            homeTeam: match.data().homeTeam.name.de,
+            homeTeam: match.data().homeTeam.name,
             matchday: match.data().matchday,
             fixtureId: match.data().apiFixtureId,
           })
@@ -90,7 +91,7 @@ const updateodds = onCall(
           kicktippSeasonId,
           match.homeTeam,
           match.matchday,
-          "Y2hyaXN0b3BoZXIlNDBzY2hhdW1sb2VmZmVsLmRlOjE2OTQxMTU5NjQ4MjQ6NTQ5M2VmOTNmYTkzNGNmOTdkNzYzZDNiNzRkOTBjOGY"
+          loginToken
         );
         return {
           matchId: match.id,
@@ -125,7 +126,7 @@ const updateodds = onCall(
 
               const kicktippOdds = await getKicktippOdds(
                 season.kurzname,
-                season.seasonId,
+                season.tippSaisonId,
                 matches
               );
               const matchesWithOdds = await Promise.all(
@@ -166,7 +167,7 @@ const updateodds = onCall(
             (
               e
             ): e is Promise<{
-              season: { en: string; de: string };
+              season: string;
               matches: number;
               odds: number;
             }> => e != null

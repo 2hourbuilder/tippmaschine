@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { SectionList, SectionListRenderItemInfo } from "react-native";
 import { MatchShort } from "../../models/match";
 import { MatchGroupItem } from "../../models/match";
-import { StyledView } from "../core";
+import { StyledText, StyledView } from "../core";
 import MatchCard from "./MatchCard";
 import MatchGroupHeader from "./MatchGroupHeader";
 

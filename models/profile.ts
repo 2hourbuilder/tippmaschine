@@ -25,6 +25,5 @@ export type MyTip = {
 };
 
 export interface ProfileSettings {
-  language: "en-US" | "de-DE";
   appearance: "dark" | "light" | "system";
 }

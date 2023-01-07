@@ -31,11 +31,16 @@ export const KicktippLoginForm = () => {
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      await signUpWithEmail("Max", data.email, data.password);
+      await signUpWithEmail(
+        "Tipper_" + String(Math.floor(Math.random() * 100000)),
+        data.email,
+        data.password
+      );
       await updateUser();
       setIsSubmitting(false);
     } catch (error) {
       if (error instanceof Error) {
+        console.log(error);
         setAuthError(error);
       }
       setIsSubmitting(false);

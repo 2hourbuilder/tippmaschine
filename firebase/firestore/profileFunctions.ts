@@ -25,7 +25,7 @@ export const initializeProfile = async (
   try {
     await setDoc(userRef, {
       myCompetitions: myCompetitions ? myCompetitions : [],
-      settings: { appearance: "system", language: "en-US" },
+      settings: { appearance: "system" },
       username: username,
       loginToken: loginToken,
     });

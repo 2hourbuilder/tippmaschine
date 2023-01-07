@@ -14,32 +14,39 @@ import {
   listCompetitionsResults,
   GetMyTipsParams,
   GetMyTipsResults,
+  SubmitSingleTipParams,
+  SubmitSingleTipResults,
 } from "../../functionTypes";
 
 export const updateOdds = createFunctionURL<
   UpdateOddsParams,
   UpdateOddsResults
->("http://localhost:5001/tippmaschine-8fb2e/europe-west1/updateodds");
+>("https://updateodds-cu35534laa-ew.a.run.app");
 
 export const getLoginToken = createFunctionURL<
   GetLoginTokenParams,
   GetLoginTokenResults
->("http://localhost:5001/tippmaschine-8fb2e/europe-west1/getlogintoken"); //"https://getlogintoken-cu35534laa-ew.a.run.app");
+>("https://getlogintoken-cu35534laa-ew.a.run.app");
 
 export const getSeason = createFunctionURL<GetSeasonParams, GetSeasonResults>(
-  "http://localhost:5001/tippmaschine-8fb2e/europe-west1/getseason"
+  "https://addseason-cu35534laa-ew.a.run.app"
 );
 
 export const addCompetition = createFunctionURL<
   AddCompetitionParams,
   AddCompetitionResults
->("http://localhost:5001/tippmaschine-8fb2e/europe-west1/addcompetition");
+>("https://addcompetition-cu35534laa-ew.a.run.app");
 
 export const listCompetitions = createFunctionURL<
   listCompetitionsParams,
   listCompetitionsResults
->("http://localhost:5001/tippmaschine-8fb2e/europe-west1/getallcompetitions");
+>("https://getallcompetitions-cu35534laa-ew.a.run.app");
 
 export const getMyTips = createFunctionURL<GetMyTipsParams, GetMyTipsResults>(
-  "http://localhost:5001/tippmaschine-8fb2e/europe-west1/getmytips"
+  "https://getmytips-cu35534laa-ew.a.run.app"
 );
+
+export const submitSingleTip = createFunctionURL<
+  SubmitSingleTipParams,
+  SubmitSingleTipResults
+>("https://submitsingletip-cu35534laa-ew.a.run.app");

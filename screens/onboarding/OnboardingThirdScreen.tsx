@@ -223,7 +223,11 @@ export default function OnboardingThirdScreen({
       </StyledText>
       <StyledView width={"90%"}>
         {isLoading ? (
-          <StyledText>Tipprunden laden...</StyledText>
+          competitions ? (
+            <StyledText>Tipprunden werden hinzugefügt...</StyledText>
+          ) : (
+            <StyledText>Tipprunden laden...</StyledText>
+          )
         ) : competitions ? (
           <StyledView>
             <ScrollView>

@@ -26,8 +26,21 @@ const addseason = onCall(
       throw new HttpsError("permission-denied", "Need to be authenticated");
     }
 
-    const { kurzname, apiLeagueId, apiSeason, loginToken } = event.data;
+    const { apiLeagueId, apiSeason, kurzname, loginToken } = event.data;
     const fixtures = await getFixtures(apiLeagueId, apiSeason);
+    const teams = await listTeamsAPI(apiLeagueId, apiSeason);
+    const createdTeams: Array<Team> = [];
+    const info: {
+      createdTeams: number;
+      getTeamCalls: number;
+      loadedFromCreated: number;
+      addNewRuns: number;
+    } = {
+      createdTeams: 0,
+      addNewRuns: 0,
+      getTeamCalls: 0,
+      loadedFromCreated: 0,
+    };
     let exists = false;
 
     const checkIfSeasonExists = async (seasonID: string) => {
@@ -38,7 +51,25 @@ const addseason = onCall(
       return !result.empty;
     };
 
-    const addTeam = async (name: { en: string; de: string }) => {
+    const getTippsaisonId = async () => {
+      const config = {
+        method: "get",
+        url: `https://www.kicktipp.de/${kurzname}/tippabgabe`,
+        headers: {
+          Cookie: `kurzname=${kurzname}; login=${loginToken}`,
+        },
+      };
+      const request = await axios(config);
+      const $ = cheerio.load(request.data);
+      const tippsaisonId = $("a[href*='tippsaisonId']").attr("href");
+      if (tippsaisonId) {
+        return tippsaisonId.split("tippsaisonId=")[1].split("&")[0];
+      } else {
+        return "";
+      }
+    };
+
+    const addTeam = async (name: string) => {
       const writeToFirestore = async (team: Team) => {
         const { logoUrl, name, apiId } = team;
         try {
@@ -59,9 +90,8 @@ const addseason = onCall(
       };
 
       const createTeam = async () => {
-        const teams = await listTeamsAPI(apiLeagueId, apiSeason);
         const matches = stringSimilarity.findBestMatch(
-          name.en,
+          name,
           teams.map((team) => team.name)
         );
         const bestmatch = teams[matches.bestMatchIndex];
@@ -80,8 +110,9 @@ const addseason = onCall(
           return null;
         }
       };
+
       let team: Team | null;
-      if (name.de === "unbekannt") {
+      if (name === "unbekannt") {
         team = {
           apiId: null,
           id: null,
@@ -95,29 +126,25 @@ const addseason = onCall(
         const id = await writeToFirestore(team);
         team.id = id;
       } else {
-        throw new Error(
-          `Could not create team for given name ${name.de} / ${name.en}. `
-        );
+        throw new Error(`Could not create team for given name ${name}. `);
       }
       return team;
     };
 
-    const getTeam = async (name: { en: string; de: string }) => {
+    const getTeam = async (name: string) => {
+      info.getTeamCalls = info.getTeamCalls + 1;
+      const existingTeam = createdTeams.find((t) => t.name === name);
+      if (existingTeam) {
+        info.loadedFromCreated = info.loadedFromCreated + 1;
+        return existingTeam;
+      }
       let doc = null;
-      const snapshotEN = await firestore()
+      const snapshotDE = await firestore()
         .collection("teams")
-        .where("name.en", "==", name.en)
+        .where("name", "==", name)
         .get();
-      if (snapshotEN.empty) {
-        const snapshotDE = await firestore()
-          .collection("teams")
-          .where("name.de", "==", name.de)
-          .get();
-        if (!snapshotDE.empty) {
-          doc = snapshotDE.docs[0];
-        }
-      } else {
-        doc = snapshotEN.docs[0];
+      if (!snapshotDE.empty) {
+        doc = snapshotDE.docs[0];
       }
       if (doc) {
         const team: Team = {
@@ -129,9 +156,12 @@ const addseason = onCall(
         return team;
       } else {
         // add team
-        console.log("Adding team: ", name.de);
+        console.log("Adding team: ", name);
+        info.addNewRuns = info.addNewRuns + 1;
         const team = await addTeam(name);
         if (team) {
+          createdTeams.push(team);
+          info.createdTeams = info.createdTeams + 1;
           return team;
         } else {
           return null;
@@ -148,6 +178,8 @@ const addseason = onCall(
         matches,
         startYear,
         kurzname,
+        active,
+        tippSaisonId,
       } = season;
       try {
         exists = await checkIfSeasonExists(seasonId);
@@ -165,6 +197,8 @@ const addseason = onCall(
               ),
               startYear: startYear,
               kurzname: kurzname,
+              active: active,
+              tippSaisonId: tippSaisonId,
             });
 
           const bulkWriter = firestore().bulkWriter();
@@ -206,23 +240,11 @@ const addseason = onCall(
             Cookie: `kurzname=${kurzname}; login=${loginToken}`,
           },
         };
-        const configEN = {
-          method: "get",
-          url: `https://www.kicktipp.com/${kurzname}/tables`,
-          headers: {
-            Cookie: `kurzname=${kurzname}; login=${loginToken}`,
-          },
-        };
         const responseDE = await axios(configDE);
-        const responseEN = await axios(configEN);
+
         const $de = cheerio.load(responseDE.data);
-        const $en = cheerio.load(responseEN.data);
+
         const seasonDE = $de("div[class='tabs']")
-          .children()
-          .not(".optiontab")
-          .not(".optionoverlay")
-          .toArray();
-        const seasonEN = $en("div[class='tabs']")
           .children()
           .not(".optiontab")
           .not(".optionoverlay")
@@ -230,32 +252,22 @@ const addseason = onCall(
         const seasonId = $de("a", seasonDE[0])
           .attr("href")
           ?.split("saisonId=")[1];
-        const seasonName = {
-          de: $de(seasonDE[0]).text(),
-          en: $en(seasonEN[0]).text(),
-        };
+        const seasonName = $de(seasonDE[0]).text();
+
         const groups = $de("table").filter(".sporttabelle").toArray();
-        const groupsEN = $en("table").filter(".sporttabelle").toArray();
-        const formattedgroups = groups.map((group, groupIndex) => {
+        const formattedgroups = groups.map((group) => {
           const tbody = $de("tbody", group);
-          const datarowsEN = $en("tbody", groupsEN[groupIndex])
-            .children()
-            .toArray();
 
           return {
-            name: {
-              de: $de("th", group).filter(".mannschaft").text(),
-              en: $en("th", groupsEN[groupIndex]).filter(".mannschaft").text(),
-            },
+            name: $de("th", group).filter(".mannschaft").text(),
             members: tbody
               .children()
               .toArray()
-              .map((datarow, teamIndex) => {
+              .map((datarow) => {
                 const data = $de("td", datarow).toArray();
-                const dataEN = $en("td", datarowsEN[teamIndex]).toArray();
                 return {
                   position: Number($de(data[0]).text().replace(".", "")),
-                  name: { de: $de(data[1]).text(), en: $en(dataEN[1]).text() },
+                  name: $de(data[1]).text(),
                   matchesPlayed: Number($de(data[2]).text()),
                   points: Number($de(data[3]).text()),
                   goalDiff: Number($de(data[5]).text()),
@@ -281,6 +293,8 @@ const addseason = onCall(
           matches: [],
           startYear: 0,
           kurzname: kurzname,
+          active: true,
+          tippSaisonId: "",
         };
         return season;
       } catch (error) {
@@ -304,41 +318,28 @@ const addseason = onCall(
           Cookie: `kurzname=${kurzname}; login=${loginToken}; kt_browser_timezone=Europe%2FBerlin`,
         },
       };
-      const configEN = {
-        method: "get",
-        url: `https://www.kicktipp.com/${kurzname}/schedule?&spieltagIndex=${matchDayIndex}`,
-        headers: {
-          Cookie: `kurzname=${kurzname}; login=${loginToken}; kt_browser_timezone=Europe%2FBerlin`,
-        },
+      const wait = (milliseconds: number) => {
+        return new Promise((resolve) => setTimeout(resolve, milliseconds));
       };
+
+      await wait(matchDayIndex * 500);
+
       const response = await axios(config);
-      const responseEN = await axios(configEN);
+
       const $ = cheerio.load(response.data);
-      const $EN = cheerio.load(responseEN.data);
+
       const matchRows = $("#spiele").find("tbody").children().toArray();
-      const matchRowsEN = $EN("#spiele").find("tbody").children().toArray();
+
       const matches: Match[] = await Promise.all(
-        matchRows.map(async (matchRow, rowIndex) => {
+        matchRows.map(async (matchRow) => {
           const [kickoffRaw /* tippterminRaw */, , homeTeamName, awayTeamName] =
             $(matchRow).children().toArray();
-          const [
-            ,
-            ,
-            /* kickoffRaw */ /* tippterminRaw */ homeTeamNameEN,
-            awayTeamNameEN,
-          ] = $EN(matchRowsEN[rowIndex]).children().toArray();
           const [homeTeamScore, awayTeamScore] = $("td", matchRow)
             .filter(".ergebnis")
             .text()
             .split(":");
-          const homeTeam: Team | null = await getTeam({
-            de: $(homeTeamName).text(),
-            en: $EN(homeTeamNameEN).text(),
-          });
-          const awayTeam: Team | null = await getTeam({
-            de: $(awayTeamName).text(),
-            en: $EN(awayTeamNameEN).text(),
-          });
+          const homeTeam: Team | null = await getTeam($(homeTeamName).text());
+          const awayTeam: Team | null = await getTeam($(awayTeamName).text());
           const kickoff = parseKicktippDate($(kickoffRaw).text());
           const apiFixtureId = homeTeam
             ? fixtures.find(
@@ -394,20 +395,22 @@ const addseason = onCall(
     try {
       const season = await createSeasonObject();
       const matches = await loadMatches(season);
+      const tippSaisonId = await getTippsaisonId();
       season.matches = matches;
       season.startYear = matches[1].kickoff.getFullYear();
+      season.tippSaisonId = tippSaisonId;
       await addSeasonToFirestore(season);
       const result = exists
         ? {
             message: "Season already exists",
           }
         : {
-            message: `Season ${season.seasonName.de} with id ${season.seasonId} added to database.`,
+            message: `Season ${season.seasonName} with id ${season.seasonId} added to database.`,
           };
       return {
         seasonId: season.seasonId,
         seasonName: season.seasonName,
-        message: result.message,
+        message: JSON.stringify({ info: info, result: result }),
       } as GetSeasonResults;
     } catch (error) {
       logger.error("Could not complete function", error);

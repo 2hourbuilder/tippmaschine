@@ -16,6 +16,19 @@ export type listCompetitionsResults = {
   name: string;
 }[];
 
+export interface SubmitSingleTipParams {
+  loginToken: string;
+  kurzname: string;
+  tippSaisonId: number;
+  tippspielId: number;
+  homeGoals: number;
+  awayGoals: number;
+}
+
+export interface SubmitSingleTipResults {
+  message: string;
+}
+
 export interface AddCompetitionParams {
   loginToken: string;
   kurzname: string;
@@ -52,17 +65,19 @@ export type GetSeasonParams = {
 
 export type GetSeasonResults = {
   seasonId: string;
-  seasonName: { en: string; de: string };
+  seasonName: string;
   message?: string;
 };
 
 export interface UpdateOddsParams {
+  loginToken: string;
+  sourceTippSaisonId: string;
   fromDaysInFuture?: number;
   untilDaysInFuture?: number;
 }
 
 export interface UpdateOddsResults {
-  season: { en: string; de: string };
+  season: string;
   matches: number;
   odds: number;
 }
