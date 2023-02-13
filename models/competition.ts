@@ -23,6 +23,7 @@ export interface MatchPointsRule {
 }
 
 export interface MatchDay {
+  id: string;
   index: number;
   name: string;
   matchesShorts: MatchShort[];

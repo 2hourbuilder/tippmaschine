@@ -55,3 +55,22 @@ export interface APIOdds {
   update: string;
   bookmakers: APIBookmaker[];
 }
+
+export interface APIScore {
+  halftime: {
+    away: number | null;
+    home: number | null;
+  };
+  fulltime: {
+    away: number | null;
+    home: number | null;
+  };
+  extratime: {
+    away: number | null;
+    home: number | null;
+  };
+  penalty: {
+    away: number | null;
+    home: number | null;
+  };
+}

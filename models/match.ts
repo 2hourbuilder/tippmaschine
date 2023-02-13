@@ -4,6 +4,7 @@ import { Team } from "./team";
 export interface Score {
   homeTeam: number | null;
   awayTeam: number | null;
+  diff: number | null;
 }
 
 export interface Odds {

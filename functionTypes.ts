@@ -71,7 +71,6 @@ export type GetSeasonResults = {
 
 export interface UpdateOddsParams {
   loginToken: string;
-  sourceTippSaisonId: string;
   fromDaysInFuture?: number;
   untilDaysInFuture?: number;
 }
@@ -80,4 +79,11 @@ export interface UpdateOddsResults {
   season: string;
   matches: number;
   odds: number;
+}
+
+export interface UpdateCompetitionParams {
+  competitionId: string;
+  numberOfFutureMatchdays: number;
+  loginToken: string;
+  batchRun: boolean;
 }
