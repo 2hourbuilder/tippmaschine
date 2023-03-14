@@ -6,6 +6,7 @@ import { firestore } from "firebase-admin";
 import { Season } from "../../models/season";
 import { Match } from "../../models/match";
 import { Team } from "../../models/team";
+import { Profile } from "../../models/profile";
 import { Competition, MatchDay } from "../../models/competition";
 
 dayjs.extend(utc);
@@ -34,6 +35,7 @@ const db = () => {
     competitions: dataPoint<Competition>("competitions"),
     matchdays: (competitionId: string) =>
       dataPoint<MatchDay>(`competitions/${competitionId}/matchdays`),
+    profiles: dataPoint<Profile>("profiles"),
   };
 };
 export { db };

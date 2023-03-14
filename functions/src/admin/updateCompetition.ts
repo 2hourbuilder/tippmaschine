@@ -1,9 +1,11 @@
+import dayjs = require("dayjs");
 import { logger } from "firebase-functions/v1";
 import {
   HttpsError,
   onCall,
   CallableRequest,
 } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import _ = require("lodash");
 import { UpdateCompetitionParams } from "../../../functionTypes";
 import { MatchDay } from "../../../models/competition";
@@ -48,7 +50,7 @@ interface SeasonMatchData {
 const updateCompetition = async ({
   competitionId,
   numberOfFutureMatchdays,
-  batchRun,
+  seasonMatchData,
   loginToken,
 }: UpdateCompetitionParams) => {
   const getCompetitionDetails = async () => {
@@ -118,12 +120,38 @@ const updateCompetition = async ({
     return requests;
   };
 
+  const updateCurrentMatchday = async (currentMatchday: number) => {
+    let newCurrentMatchday = currentMatchday;
+    const snapshot = await db()
+      .matchdays(competitionId)
+      .where("complete", "==", false)
+      .orderBy("firstKickoff", "asc")
+      .limit(1)
+      .get();
+    if (snapshot.empty) {
+      const finalMatchday = await db()
+        .matchdays(competitionId)
+        .where("complete", "==", true)
+        .orderBy("index", "desc")
+        .limit(1)
+        .get();
+      newCurrentMatchday = finalMatchday.docs[0].data().index;
+    }
+    newCurrentMatchday = snapshot.docs[0].data().index;
+    await db().competitions.doc(competitionId).update({
+      currentMatchday: newCurrentMatchday,
+    });
+  };
+
   const updateMatchday = async (
     matchday: MatchDay,
     seasonMatchData: SeasonMatchData[],
     kurzname: string,
     tippsaisonId: string
   ) => {
+    logger.info(
+      `Updating matchday ${matchday.id} for competition ${competitionId}...`
+    );
     const writeToFirestore = async (
       matchdayId: string,
       complete: boolean,
@@ -138,6 +166,7 @@ const updateCompetition = async ({
         logger.error("Error in writing updated matchday to Firestore", err);
       }
     };
+
     const matchesShorts = matchday.matchesShorts;
     const includesQuotes =
       matchesShorts.findIndex((m) => m.pointsRule.type === "quotes") === -1
@@ -217,7 +246,11 @@ const updateCompetition = async ({
     const newComplete = newMatchShorts.find((m) => m.score.awayTeam === null)
       ? false
       : true;
-
+    logger.info(
+      `Old matchday data: ${JSON.stringify(
+        matchday
+      )}, New matchdata: ${JSON.stringify(newMatchShorts)}`
+    );
     await writeToFirestore(matchday.id, newComplete, newMatchShorts);
   };
 
@@ -226,14 +259,21 @@ const updateCompetition = async ({
   try {
     const competitionDetails = await getCompetitionDetails();
     if (typeof competitionDetails === "undefined") {
+      logger.info("Found no details for competition");
       return;
     }
     const matchdays = await getMatchdays();
     if (matchdays === null) {
+      logger.info("No matchdays to update");
       return;
     }
-    const dataRequest = getRequiredSeasonAndMatchIds(matchdays);
-    const seasonMatchData = await getSeasonMatchData(dataRequest);
+
+    if (seasonMatchData.length === 0) {
+      const dataRequest = getRequiredSeasonAndMatchIds(matchdays);
+      const seasonMatchDataRequest = await getSeasonMatchData(dataRequest);
+      seasonMatchDataRequest.forEach((s) => seasonMatchData.push(s));
+    }
+
     await Promise.all(
       matchdays.map(async (matchday) => {
         await updateMatchday(
@@ -244,21 +284,133 @@ const updateCompetition = async ({
         );
       })
     );
-    if (batchRun) {
-      // get data from parent function
-    } else {
-      //
-    }
+
+    await updateCurrentMatchday(competitionDetails.currentMatchday);
+
+    return "Success";
   } catch (error) {
     logger.error("Ran into error updating competition data", error);
     throw new HttpsError("internal", "Error in updating competition data");
   }
-  return null;
 };
 
 export const updateCompetitionOnCall = onCall(
   { region: "europe-west1" },
   async (data: CallableRequest<UpdateCompetitionParams>) => {
     await updateCompetition(data.data);
+  }
+);
+
+export const updateAllCompetitionOnSchedule = onSchedule(
+  { timeZone: "Europe/Berlin", schedule: "0 4 * * *", region: "europe-west1" },
+  async () => {
+    /*
+    1. get active seasons and data
+    2. Load all competitions with an active season
+    3. Iterate through competitions
+    */
+
+    const getActiveSeasonMatchData = async () => {
+      const seasonSnapshots = await db()
+        .seasons.where("active", "==", true)
+        .get();
+      const seasons = seasonSnapshots.docs.map((doc) => {
+        const season = doc.data();
+        season.id = doc.id;
+        return season;
+      });
+      const startDate = dayjs().subtract(5, "day").toDate();
+      const seasonsWithMatchData = await Promise.all(
+        seasons.map(async (season) => {
+          const matchesSnapshot = await db()
+            .matches(season.id!)
+            .where("kickoff", ">=", startDate)
+            .get();
+          const matchesData = matchesSnapshot.docs.map((doc) => {
+            return { matchId: doc.id, matchData: doc.data() };
+          });
+          const result: SeasonMatchData = {
+            seasonId: season.id!,
+            matches: matchesData,
+          };
+          return result;
+        })
+      );
+
+      return seasonsWithMatchData;
+    };
+    const getUserTokenforCompetition = async (competitionId: string) => {
+      const profiles = await db()
+        .profiles.where("myCompetitionIds", "array-contains", competitionId)
+        .limit(3)
+        .get();
+      const tokens = profiles.docs.map((doc) => {
+        const token = doc.data().loginToken;
+        if (token != undefined) {
+          return token;
+        } else {
+          return "na";
+        }
+      });
+      return tokens.filter((t) => t != "na");
+    };
+    const getAllActiveCompetitionIds = async (seasonIds: string[]) => {
+      const competitionSnapshot = await db()
+        .competitions.where("seasonIds", "array-contains-any", seasonIds)
+        .get();
+      const data = await Promise.all(
+        competitionSnapshot.docs.map(async (doc) => {
+          const tokens = await getUserTokenforCompetition(doc.id);
+          return {
+            competitionId: doc.id,
+            userTokens: tokens,
+          };
+        })
+      );
+
+      return data;
+    };
+
+    try {
+      logger.info("Start execution");
+      const allSeasonMatchData = await getActiveSeasonMatchData();
+      logger.info(
+        "Loaded all season match data",
+        JSON.stringify(allSeasonMatchData)
+      );
+      const activeSeasonIds = allSeasonMatchData.map((s) => s.seasonId);
+      logger.info("Loaded all season ids", JSON.stringify(activeSeasonIds));
+      const activeCompetitionIds = await getAllActiveCompetitionIds(
+        activeSeasonIds
+      );
+      logger.info(
+        "Loaded all competition ids",
+        JSON.stringify(activeCompetitionIds)
+      );
+
+      const result = await Promise.all(
+        activeCompetitionIds.map(async (cObject) => {
+          try {
+            await updateCompetition({
+              competitionId: cObject.competitionId,
+              numberOfFutureMatchdays: 3,
+              loginToken: cObject.userTokens[0],
+              seasonMatchData: allSeasonMatchData,
+            });
+            return `Successfully updated ${cObject.competitionId} competition.`;
+          } catch (error) {
+            logger.error(
+              `Error in updating competition ${cObject.competitionId}`,
+              error
+            );
+            throw Error("Error in updating competitions.");
+          }
+        })
+      );
+      logger.info(result);
+    } catch (error) {
+      logger.error("Error in updating competition", error);
+      throw Error("Error in updating competitions.");
+    }
   }
 );

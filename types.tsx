@@ -9,6 +9,7 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { MatchShort } from "./models/match";
 
 declare global {
   namespace ReactNavigation {
@@ -31,7 +32,7 @@ export type RootStackParamList = {
 
 export type MatchesStackParamList = {
   Matchlist: { competitionId: string };
-  MatchDetail: { matchId: string };
+  MatchDetail: { matchId: string; shortData: MatchShort };
 };
 
 export type CompetitionStackParamList = {

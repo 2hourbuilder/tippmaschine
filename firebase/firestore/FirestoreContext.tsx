@@ -12,6 +12,7 @@ import { firestore } from "../setup";
 import { Competition, MatchDay } from "../../models/competition";
 import { useLocalStorage } from "../../localStorage/localStorageContext";
 import { competitionsCol, matchdaysCol } from "./helper";
+import _ from "lodash";
 
 interface FirestoreContextStructure {
   competitionData: Competition | null;
@@ -71,9 +72,10 @@ export const FirestoreProvider = ({
             const submitDate = match.submitDate as unknown;
             const kickoffTS = kickoff as Timestamp;
             const submitDateTS = submitDate as Timestamp;
-            match.kickoff = kickoffTS.toDate();
-            match.submitDate = submitDateTS.toDate();
-            return match;
+            const newMatch = _.cloneDeep(match);
+            newMatch.kickoff = kickoffTS.toDate();
+            newMatch.submitDate = submitDateTS.toDate();
+            return newMatch;
           });
           newMatchday.matchesShorts = matchesWithDates;
           newMatchdays.push(newMatchday);

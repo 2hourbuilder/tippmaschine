@@ -1,3 +1,5 @@
+import { Match } from "./models/match";
+
 export interface GetLoginTokenParams {
   username: string;
   password: string;
@@ -85,5 +87,11 @@ export interface UpdateCompetitionParams {
   competitionId: string;
   numberOfFutureMatchdays: number;
   loginToken: string;
-  batchRun: boolean;
+  seasonMatchData: {
+    seasonId: string;
+    matches: {
+      matchId: string;
+      matchData: Match | undefined;
+    }[];
+  }[];
 }

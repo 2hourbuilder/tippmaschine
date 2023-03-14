@@ -9,7 +9,9 @@ interface TipBoxProps {
   tippspielId: string | null;
 }
 const TipBox = ({ scoreStats, tippspielId }: TipBoxProps) => {
-  const tipString = `${scoreStats.score.homeTeam}:${scoreStats.score.awayTeam}`;
+  const tipString = scoreStats
+    ? `${scoreStats.score.homeTeam}:${scoreStats.score.awayTeam}`
+    : "- : -";
   const { competitionData } = useMyFirestore();
   const { profile } = useUser();
   const myCompetition = profile?.myCompetitions.find(
@@ -33,8 +35,8 @@ const TipBox = ({ scoreStats, tippspielId }: TipBoxProps) => {
       }}
       borderRadius="l"
       borderWidth={
-        myTip?.homeTip === scoreStats.score.homeTeam &&
-        myTip.awayTip === scoreStats.score.awayTeam
+        myTip?.homeTip === scoreStats?.score.homeTeam &&
+        myTip?.awayTip === scoreStats?.score.awayTeam
           ? 2
           : 0
       }
@@ -49,7 +51,7 @@ const TipBox = ({ scoreStats, tippspielId }: TipBoxProps) => {
         </StyledView>
         <StyledView height={24}>
           <StyledText textAlign={"center"} fontSize={12} lineHeight={20}>
-            {scoreStats.ev.toFixed(2)}
+            {scoreStats?.ev.toFixed(2)}
           </StyledText>
         </StyledView>
       </StyledView>

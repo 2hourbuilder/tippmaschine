@@ -13,6 +13,7 @@ import { groupMatchesByDate } from "../../helpers/functions/groupMatchesByDate";
 import { useLocalStorage } from "../../localStorage/localStorageContext";
 import { MatchGroupItem } from "../../models/match";
 import { NestedStackScreenProps } from "../../types";
+import { VictoryBar, VictoryChart } from "victory-native";
 
 const createSeasonHandler = async () => {
   try {
@@ -71,9 +72,17 @@ export default function MatchlistScreen({
       newmatchesGrouped.push(...groupMatchesByDate(matchday.matchesShorts));
     });
   }
+  const data = [
+    { quarter: 1, earnings: 13000 },
+    { quarter: 2, earnings: 16500 },
+    { quarter: 3, earnings: 14250 },
+    { quarter: 4, earnings: 19000 },
+  ];
 
   return (
     <StyledView px={"m"}>
+      <VictoryBar data={data} x="quarter" y="earnings" />
+
       <MatchesList matchesGrouped={newmatchesGrouped} />
       <StyledButton label="Add competition" onPress={addCompetitionHandler} />
       <StyledButton label="Get My tips" onPress={testFunctionHandler} />

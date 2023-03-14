@@ -1,5 +1,6 @@
 export interface Profile {
   myCompetitions: MyCompetition[];
+  myCompetitionIds: string[];
   settings: ProfileSettings;
   username: string | undefined;
   loginToken: string | undefined;

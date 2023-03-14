@@ -8,7 +8,10 @@ import getallcompetitions from "./kicktipp/getallcompetitions";
 import getmytips from "./kicktipp/getmytips";
 import submitsingletip from "./kicktipp/submitsingletip";
 import { setGlobalOptions } from "firebase-functions/v2";
-import { updateCompetitionOnCall } from "./admin/updateCompetition";
+import {
+  updateAllCompetitionOnSchedule,
+  updateCompetitionOnCall,
+} from "./admin/updateCompetition";
 import {
   updateScoresOnCall,
   updateScoresOnSchedule,
@@ -28,5 +31,6 @@ exports.getallcompetitions = getallcompetitions;
 exports.getmytips = getmytips;
 exports.submitsingletip = submitsingletip;
 exports.updatecompetition = updateCompetitionOnCall;
+exports.updatecompetitiononschedule = updateAllCompetitionOnSchedule;
 exports.updatescoresoncall = updateScoresOnCall;
 exports.updatescoresonschedule = updateScoresOnSchedule;

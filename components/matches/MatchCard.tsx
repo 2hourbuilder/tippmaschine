@@ -24,6 +24,7 @@ const MatchCard = ({ matchDetails }: MatchCardProps) => {
         matchDetails.matchId
           ? navigation.navigate("MatchDetail", {
               matchId: matchDetails.matchId,
+              shortData: matchDetails,
             })
           : null
       }
